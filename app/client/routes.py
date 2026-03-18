@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+﻿from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app.models import db, Service, Supplement, RendezVous, RDVSupplement, verifier_conflit, get_creneaux_disponibles
@@ -106,4 +106,27 @@ def creneaux_disponibles():
 def mes_rendezvous():
     rdvs = RendezVous.query.filter_by(user_id=current_user.id).order_by(
         RendezVous.debut_datetime.desc()).all()
-    return render_template('client/mes_rendezvous.html', rendezvous=rdvs)
+    return render_template('client/mes_rendezvous.html', rendezvous=rdvs, now=datetime.now())
+
+
+@client_bp.route('/rdv/<int:rdv_id>/annuler', methods=['POST'])
+@login_required
+def annuler_rdv(rdv_id):
+    rdv = RendezVous.query.get_or_404(rdv_id)
+
+    if rdv.user_id != current_user.id:
+        flash('Action non autorisee.', 'danger')
+        return redirect(url_for('client.mes_rendezvous'))
+
+    if rdv.statut == 'annule':
+        flash('Ce RDV est deja annule.', 'warning')
+        return redirect(url_for('client.mes_rendezvous'))
+
+    if rdv.debut_datetime - datetime.now() < timedelta(hours=2):
+        flash('Annulation impossible moins de 2h avant le rendez-vous.', 'danger')
+        return redirect(url_for('client.mes_rendezvous'))
+
+    rdv.statut = 'annule'
+    db.session.commit()
+    flash('Votre rendez-vous a ete annule. Le creneau est libere.', 'success')
+    return redirect(url_for('client.mes_rendezvous'))
