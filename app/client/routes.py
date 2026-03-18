@@ -12,6 +12,15 @@ def vitrine():
     return render_template('client/vitrine.html', services=services)
 
 
+@client_bp.route('/salon')
+def profil_salon():
+    from app.models import ProfilSalon, PhotoSalon
+    profil = ProfilSalon.get()
+    photos = PhotoSalon.query.filter_by(salon_id=profil.id).all()
+    services = Service.query.filter_by(actif=True).order_by(Service.nom).all()
+    return render_template('client/profil_salon.html', profil=profil, photos=photos, services=services)
+
+
 @client_bp.route('/reserver', methods=['GET', 'POST'])
 @login_required
 def reserver():

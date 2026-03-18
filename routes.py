@@ -29,26 +29,26 @@ def coiffeur_required(f):
 @login_required
 @coiffeur_required
 def dashboard():
+    # Date sélectionnée (aujourd'hui par défaut)
     date_str = request.args.get('date')
     try:
-        date_selectionnee = datetime.strptime(
-            date_str, '%Y-%m-%d').date() if date_str else date.today()
+        date_selectionnee = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else date.today()
     except ValueError:
         date_selectionnee = date.today()
 
-    debut_jour = datetime(date_selectionnee.year,
-                          date_selectionnee.month, date_selectionnee.day, 0, 0)
-    fin_jour = datetime(date_selectionnee.year,
-                        date_selectionnee.month, date_selectionnee.day, 23, 59)
+    # RDV du jour sélectionné, triés par heure
+    debut_jour = datetime(date_selectionnee.year, date_selectionnee.month, date_selectionnee.day, 0, 0)
+    fin_jour = datetime(date_selectionnee.year, date_selectionnee.month, date_selectionnee.day, 23, 59)
 
     rdv_du_jour = RendezVous.query.filter(
         RendezVous.debut_datetime >= debut_jour,
         RendezVous.debut_datetime <= fin_jour
     ).order_by(RendezVous.debut_datetime).all()
 
-    rdv_attente = RendezVous.query.filter_by(
-        statut='en_attente').order_by(RendezVous.debut_datetime).all()
+    # Toutes les demandes en attente (tous jours)
+    rdv_attente = RendezVous.query.filter_by(statut='en_attente').order_by(RendezVous.debut_datetime).all()
 
+    # RDV acceptés aujourd'hui
     rdv_acceptes = RendezVous.query.filter(
         RendezVous.statut == 'accepte',
         RendezVous.debut_datetime >= debut_jour,
@@ -56,16 +56,16 @@ def dashboard():
     ).all()
 
     return render_template('admin/dashboard.html',
-                           rdv_du_jour=rdv_du_jour,
-                           rdv_attente=rdv_attente,
-                           rdv_acceptes=rdv_acceptes,
-                           aujourd_hui=date_selectionnee.strftime('%d/%m/%Y'),
-                           date_precedente=(
-                               date_selectionnee - timedelta(days=1)).strftime('%Y-%m-%d'),
-                           date_suivante=(date_selectionnee + timedelta(days=1)
-                                          ).strftime('%Y-%m-%d'),
-                           )
+        rdv_du_jour=rdv_du_jour,
+        rdv_attente=rdv_attente,
+        rdv_acceptes=rdv_acceptes,
+        aujourd_hui=date_selectionnee.strftime('%d/%m/%Y'),
+        date_precedente=(date_selectionnee - timedelta(days=1)).strftime('%Y-%m-%d'),
+        date_suivante=(date_selectionnee + timedelta(days=1)).strftime('%Y-%m-%d'),
+    )
 
+
+# ── Services ─────────────────────────────────────────
 
 @admin_bp.route('/services')
 @login_required
@@ -87,14 +87,11 @@ def ajouter_service():
         if not nom or not prix or not duree:
             flash('Nom, prix et duree sont obligatoires.', 'danger')
             return render_template('admin/service_form.html', service=None)
-        service = Service(nom=nom, prix=float(
-            prix), duree_minutes=int(duree), description=description)
+        service = Service(nom=nom, prix=float(prix), duree_minutes=int(duree), description=description)
         photo = request.files.get('photo')
         if photo and allowed_file(photo.filename):
-            filename = secure_filename(
-                f"service_{nom.lower().replace(' ', '_')}_{photo.filename}")
-            upload_dir = os.path.join(
-                current_app.root_path, 'static', 'uploads')
+            filename = secure_filename(f"service_{nom.lower().replace(' ', '_')}_{photo.filename}")
+            upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
             os.makedirs(upload_dir, exist_ok=True)
             photo.save(os.path.join(upload_dir, filename))
             service.photo = filename
@@ -117,10 +114,8 @@ def modifier_service(service_id):
         service.description = request.form.get('description', '').strip()
         photo = request.files.get('photo')
         if photo and allowed_file(photo.filename):
-            filename = secure_filename(
-                f"service_{service.nom.lower().replace(' ', '_')}_{photo.filename}")
-            upload_dir = os.path.join(
-                current_app.root_path, 'static', 'uploads')
+            filename = secure_filename(f"service_{service.nom.lower().replace(' ', '_')}_{photo.filename}")
+            upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
             os.makedirs(upload_dir, exist_ok=True)
             photo.save(os.path.join(upload_dir, filename))
             service.photo = filename
@@ -140,6 +135,8 @@ def supprimer_service(service_id):
     flash('Service desactive.', 'info')
     return redirect(url_for('admin.services'))
 
+
+# ── Suppléments ──────────────────────────────────────
 
 @admin_bp.route('/supplements')
 @login_required
@@ -192,6 +189,8 @@ def supprimer_supplement(supp_id):
     return redirect(url_for('admin.supplements'))
 
 
+# ── RDV ──────────────────────────────────────────────
+
 @admin_bp.route('/rdv/<int:rdv_id>/accepter', methods=['POST'])
 @login_required
 @coiffeur_required
@@ -216,6 +215,8 @@ def refuser_rdv(rdv_id):
     return redirect(url_for('admin.dashboard'))
 
 
+# ── Profil salon ─────────────────────────────────────
+
 @admin_bp.route('/profil', methods=['GET', 'POST'])
 @login_required
 @coiffeur_required
@@ -233,6 +234,7 @@ def profil():
         upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
         os.makedirs(upload_dir, exist_ok=True)
 
+        # Photo de profil
         photo = request.files.get('photo_profil')
         if photo and allowed_file(photo.filename):
             filename = secure_filename(f"profil_{photo.filename}")
@@ -241,17 +243,17 @@ def profil():
 
         db.session.commit()
 
+        # Photos intérieur (plusieurs)
         photos_int = request.files.getlist('photos_interieur')
         for ph in photos_int:
             if ph and allowed_file(ph.filename):
                 filename = secure_filename(f"salon_{ph.filename}")
                 ph.save(os.path.join(upload_dir, filename))
-                from app.models import PhotoSalon
                 ps = PhotoSalon(salon_id=p.id, filename=filename)
                 db.session.add(ps)
         db.session.commit()
 
-        flash('Profil mis a jour !', 'success')
+        flash('Profil mis a jour avec succes !', 'success')
         return redirect(url_for('admin.profil'))
 
     photos = PhotoSalon.query.filter_by(salon_id=p.id).all()

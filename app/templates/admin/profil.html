@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Mon profil – MonSalon{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="bi bi-person-circle text-warning"></i> Profil du salon</h2>
+
+<div class="row g-4">
+  <!-- Formulaire -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nom du salon</label>
+            <input type="text" name="nom_salon" class="form-control"
+                   value="{{ profil.nom_salon or '' }}" placeholder="Ex: Salon Joseph" required/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Bio / Description</label>
+            <textarea name="bio" class="form-control" rows="3"
+                      placeholder="Présentez votre salon, votre expérience...">{{ profil.bio or '' }}</textarea>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Numéro WhatsApp</label>
+              <div class="input-group">
+                <span class="input-group-text bg-success text-white">
+                  <i class="bi bi-whatsapp"></i>
+                </span>
+                <input type="text" name="whatsapp" class="form-control"
+                       value="{{ profil.whatsapp or '' }}" placeholder="+228 90 00 00 00"/>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Adresse</label>
+              <input type="text" name="adresse" class="form-control"
+                     value="{{ profil.adresse or '' }}" placeholder="Ex: Lomé, Quartier X"/>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Horaires d'ouverture</label>
+            <input type="text" name="horaires" class="form-control"
+                   value="{{ profil.horaires or '' }}"
+                   placeholder="Ex: Lun-Sam 8h-20h, Dim fermé"/>
+          </div>
+
+          <hr class="my-3"/>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-person-circle text-warning"></i> Photo de profil
+            </label>
+            {% if profil.photo_profil %}
+              <div class="mb-2 d-flex align-items-center gap-3">
+                <img src="{{ url_for('static', filename='uploads/' + profil.photo_profil) }}"
+                     class="rounded-circle shadow-sm"
+                     style="width:70px; height:70px; object-fit:cover;">
+                <span class="text-muted small">Photo actuelle</span>
+              </div>
+            {% endif %}
+            <input type="file" name="photo_profil" class="form-control" accept="image/*"/>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-images text-warning"></i> Photos de l'intérieur
+              <span class="text-muted small fw-normal">(plusieurs fichiers possibles)</span>
+            </label>
+            <input type="file" name="photos_interieur" class="form-control"
+                   accept="image/*" multiple/>
+            <div class="form-text text-muted">Sélectionnez plusieurs photos en maintenant Ctrl</div>
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2">
+            <i class="bi bi-check-lg"></i> Enregistrer le profil
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aperçu -->
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body text-center p-4">
+        {% if profil.photo_profil %}
+          <img src="{{ url_for('static', filename='uploads/' + profil.photo_profil) }}"
+               class="rounded-circle mb-3 shadow"
+               style="width:100px; height:100px; object-fit:cover;">
+        {% else %}
+          <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+               style="width:100px; height:100px;">
+            <i class="bi bi-person" style="font-size:2.5rem; color:#ccc;"></i>
+          </div>
+        {% endif %}
+        <h5 class="fw-bold mb-1">{{ profil.nom_salon or 'MonSalon' }}</h5>
+        {% if profil.bio %}
+          <p class="text-muted small">{{ profil.bio }}</p>
+        {% endif %}
+        {% if profil.adresse %}
+          <p class="text-muted small mb-1"><i class="bi bi-geo-alt"></i> {{ profil.adresse }}</p>
+        {% endif %}
+        {% if profil.horaires %}
+          <p class="text-muted small mb-1"><i class="bi bi-clock"></i> {{ profil.horaires }}</p>
+        {% endif %}
+        {% if profil.whatsapp %}
+          <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') }}"
+             class="btn btn-success btn-sm mt-2" target="_blank">
+            <i class="bi bi-whatsapp"></i> {{ profil.whatsapp }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Photos intérieur -->
+    {% if photos %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-3">
+          <h6 class="fw-semibold mb-3">Photos du salon</h6>
+          <div class="row g-2">
+            {% for photo in photos %}
+              <div class="col-6 position-relative">
+                <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
+                     class="img-fluid rounded" style="height:90px; width:100%; object-fit:cover;">
+                <form method="POST"
+                      action="{{ url_for('admin.supprimer_photo_salon', photo_id=photo.id) }}"
+                      class="position-absolute top-0 end-0 m-1">
+                  <button type="submit" class="btn btn-danger btn-sm py-0 px-1"
+                          onclick="return confirm('Supprimer ?')"
+                          style="font-size:11px;">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

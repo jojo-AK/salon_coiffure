@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{{ profil.nom_salon or 'MonSalon' }} – Notre salon{% endblock %}
+
+{% block content %}
+
+<!-- EN-TETE -->
+<div class="text-center py-5 mb-4 rounded-4" style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
+  {% if profil.photo_profil %}
+    <img src="{{ url_for('static', filename='uploads/' + profil.photo_profil) }}"
+         class="rounded-circle shadow mb-3"
+         style="width:110px; height:110px; object-fit:cover; border: 3px solid #c9a84c;">
+  {% else %}
+    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+         style="width:110px; height:110px; background:#2a2a2a; border: 3px solid #c9a84c;">
+      <i class="bi bi-scissors" style="font-size:2.5rem; color:#c9a84c;"></i>
+    </div>
+  {% endif %}
+
+  <h1 class="fw-bold fs-3 mb-1">{{ profil.nom_salon or 'MonSalon' }}</h1>
+  <p class="text-secondary mb-3">{{ profil.bio or 'Votre coiffeur de confiance' }}</p>
+
+  <div class="d-flex justify-content-center flex-wrap gap-3 mb-3">
+    {% if profil.adresse %}
+      <span class="text-secondary small">
+        <i class="bi bi-geo-alt text-warning"></i> {{ profil.adresse }}
+      </span>
+    {% else %}
+      <span class="text-secondary small">
+        <i class="bi bi-geo-alt text-warning"></i> Lomé, Togo
+      </span>
+    {% endif %}
+    {% if profil.horaires %}
+      <span class="text-secondary small">
+        <i class="bi bi-clock text-warning"></i> {{ profil.horaires }}
+      </span>
+    {% else %}
+      <span class="text-secondary small">
+        <i class="bi bi-clock text-warning"></i> Lun – Sam : 8h – 20h
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="d-flex justify-content-center gap-3 flex-wrap">
+    {% if current_user.is_authenticated and not current_user.is_admin() %}
+      <a href="{{ url_for('client.reserver') }}" class="btn btn-gold px-4">
+        <i class="bi bi-calendar-plus"></i> Réserver maintenant
+      </a>
+    {% elif not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-gold px-4">
+        <i class="bi bi-calendar-plus"></i> Réserver maintenant
+      </a>
+    {% endif %}
+    <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
+       class="btn btn-success px-4" target="_blank">
+      <i class="bi bi-whatsapp"></i> WhatsApp
+    </a>
+  </div>
+</div>
+
+<!-- PHOTOS INTERIEUR -->
+{% if photos %}
+  <h4 class="fw-bold mb-3"><i class="bi bi-images text-warning"></i> Notre salon</h4>
+  <div class="row g-3 mb-5">
+    {% for photo in photos %}
+      <div class="col-6 col-md-4">
+        <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
+             class="img-fluid rounded-3 shadow-sm w-100"
+             style="height:200px; object-fit:cover;"
+             alt="Photo du salon">
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- NOS SERVICES -->
+<h4 class="fw-bold mb-3"><i class="bi bi-scissors text-warning"></i> Nos services</h4>
+{% if services %}
+  <div class="row g-3 mb-5">
+    {% for service in services %}
+      <div class="col-sm-6 col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          {% if service.photo %}
+            <img src="{{ url_for('static', filename='uploads/' + service.photo) }}"
+                 class="card-img-top" style="height:160px; object-fit:cover;">
+          {% else %}
+            <div class="d-flex align-items-center justify-content-center"
+                 style="height:160px; background:#2a2a2a;">
+              <i class="bi bi-scissors" style="font-size:2rem; color:#c9a84c;"></i>
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h6 class="fw-bold mb-0">{{ service.nom }}</h6>
+              <span class="badge bg-warning text-dark">{{ service.prix|int }} FCFA</span>
+            </div>
+            {% if service.description %}
+              <p class="text-muted small mb-2">{{ service.description }}</p>
+            {% endif %}
+            <span class="text-muted small">
+              <i class="bi bi-clock"></i> {{ service.duree_minutes }} min
+            </span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- INFOS PRATIQUES -->
+<div class="row g-4 mt-2 pt-3 border-top">
+  <div class="col-md-4 text-center">
+    <i class="bi bi-clock-history text-warning" style="font-size:2rem;"></i>
+    <h6 class="mt-2 fw-semibold">Horaires</h6>
+    <p class="text-muted small mb-0">{{ profil.horaires or 'Lun – Sam : 8h – 20h' }}</p>
+  </div>
+  <div class="col-md-4 text-center">
+    <i class="bi bi-geo-alt text-warning" style="font-size:2rem;"></i>
+    <h6 class="mt-2 fw-semibold">Adresse</h6>
+    <p class="text-muted small mb-0">{{ profil.adresse or 'Lomé, Togo' }}</p>
+  </div>
+  <div class="col-md-4 text-center">
+    <i class="bi bi-whatsapp text-success" style="font-size:2rem;"></i>
+    <h6 class="mt-2 fw-semibold">Contact</h6>
+    <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
+       class="text-success small" target="_blank">
+      {{ profil.whatsapp or '+228 90 00 00 00' }}
+    </a>
+  </div>
+</div>
+
+{% endblock %}

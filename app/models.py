@@ -100,3 +100,41 @@ def get_creneaux_disponibles(date, duree_minutes, heure_ouverture=8, heure_ferme
             creneaux.append(current)
         current += timedelta(minutes=30)
     return creneaux
+
+
+class ProfilSalon(db.Model):
+    """Profil unique du salon — une seule ligne en base."""
+    __tablename__ = 'profil_salon'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nom_salon = db.Column(db.String(100), nullable=False, default='MonSalon')
+    bio = db.Column(db.Text, nullable=True)
+    whatsapp = db.Column(db.String(20), nullable=True)
+    adresse = db.Column(db.String(200), nullable=True)
+    horaires = db.Column(db.String(200), nullable=True)
+    photo_profil = db.Column(db.String(200), nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # Photos intérieur du salon (stockées séparément)
+    photos_interieur = db.relationship('PhotoSalon', backref='salon', lazy='dynamic')
+
+    @staticmethod
+    def get():
+        """Retourne le profil unique, le crée si inexistant."""
+        profil = ProfilSalon.query.first()
+        if not profil:
+            profil = ProfilSalon()
+            db.session.add(profil)
+            db.session.commit()
+        return profil
+
+
+class PhotoSalon(db.Model):
+    """Photos de l'intérieur du salon."""
+    __tablename__ = 'photos_salon'
+
+    id = db.Column(db.Integer, primary_key=True)
+    salon_id = db.Column(db.Integer, db.ForeignKey('profil_salon.id'), nullable=False)
+    filename = db.Column(db.String(200), nullable=False)
+    legende = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
