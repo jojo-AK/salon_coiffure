@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{% if supplement %}Modifier{% else %}Ajouter{% endif %} un supplément – MonSalon{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <h2 class="fw-bold mb-4">
+      <i class="bi bi-plus-circle text-warning"></i>
+      {% if supplement %}Modifier le supplément{% else %}Ajouter un supplément{% endif %}
+    </h2>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nom du supplément</label>
+            <input type="text" name="nom" class="form-control" placeholder="Ex: Sauce, Fibre capillaire..."
+                   value="{{ supplement.nom if supplement else '' }}" required/>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Prix (FCFA)</label>
+            <input type="number" name="prix" class="form-control" placeholder="Ex: 500" min="0" step="100"
+                   value="{{ supplement.prix|int if supplement else '' }}" required/>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-gold flex-fill py-2">
+              <i class="bi bi-check-lg"></i> {% if supplement %}Enregistrer{% else %}Ajouter{% endif %}
+            </button>
+            <a href="{{ url_for('admin.supplements') }}" class="btn btn-outline-secondary px-4">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

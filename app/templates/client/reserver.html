@@ -3,131 +3,284 @@
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-lg-7">
+  <div class="col-lg-8">
     <h2 class="fw-bold mb-1"><i class="bi bi-calendar-plus text-warning"></i> Réserver un rendez-vous</h2>
-    <p class="text-muted mb-4">Choisissez un service, une date et un créneau disponible.</p>
+    <p class="text-muted mb-4">Suivez les étapes ci-dessous pour finaliser votre réservation.</p>
 
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-4">
-        <form method="POST" id="formRDV">
+    <!-- Barre de progression -->
+    <div class="d-flex align-items-center mb-4 gap-2" id="progressBar">
+      <div class="step-pill active" id="pill1">1 · Service</div>
+      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
+      <div class="step-pill" id="pill2">2 · Suppléments</div>
+      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
+      <div class="step-pill" id="pill3">3 · Créneau</div>
+      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
+      <div class="step-pill" id="pill4">4 · Confirmation</div>
+    </div>
 
-          <!-- Étape 1 : Choix du service -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">
-              <span class="badge bg-warning text-dark me-2">1</span> Service
-            </label>
-            <select name="service_id" id="serviceSelect" class="form-select" required>
-              <option value="">-- Choisissez un service --</option>
-              {% for service in services %}
-                <option value="{{ service.id }}"
-                  data-duree="{{ service.duree_minutes }}"
-                  {% if request.args.get('service_id')|int == service.id %}selected{% endif %}>
-                  {{ service.nom }} — {{ service.prix|int }} FCFA ({{ service.duree_minutes }} min)
-                </option>
-              {% endfor %}
-            </select>
-            <div id="infoService" class="form-text text-muted mt-1"></div>
-          </div>
+    <form method="POST" id="formRDV">
+      <input type="hidden" name="service_id" id="hidServiceId" required/>
+      <input type="hidden" name="date" id="hidDate" required/>
+      <input type="hidden" name="heure" id="hidHeure" required/>
 
-          <!-- Étape 2 : Choix de la date -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">
-              <span class="badge bg-warning text-dark me-2">2</span> Date
-            </label>
-            <input type="date" name="date" id="dateInput" class="form-control" required
-                   min="{{ today }}" />
-          </div>
-
-          <!-- Étape 3 : Choix du créneau (chargé en AJAX) -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">
-              <span class="badge bg-warning text-dark me-2">3</span> Créneau disponible
-            </label>
-            <div id="creneauxContainer">
-              <p class="text-muted small">Sélectionnez un service et une date pour voir les créneaux.</p>
+      <!-- ÉTAPE 1 : Service -->
+      <div class="step-block" id="step1">
+        <h5 class="fw-semibold mb-3">Choisissez un service</h5>
+        <div class="row g-3">
+          {% for service in services %}
+          <div class="col-sm-6">
+            <div class="card service-card h-100 border-0 shadow-sm" data-id="{{ service.id }}" data-prix="{{ service.prix }}" data-duree="{{ service.duree_minutes }}" data-nom="{{ service.nom }}">
+              {% if service.photo %}
+                <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top" style="height:140px;object-fit:cover;" alt="{{ service.nom }}">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10" style="height:140px;">
+                  <i class="bi bi-scissors" style="font-size:3rem;color:#ccc;"></i>
+                </div>
+              {% endif %}
+              <div class="card-body">
+                <h6 class="fw-bold mb-1">{{ service.nom }}</h6>
+                <p class="text-muted small mb-2">{{ service.description or '' }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="badge bg-warning text-dark">{{ service.prix|int }} FCFA</span>
+                  <span class="text-muted small"><i class="bi bi-clock"></i> {{ service.duree_minutes }} min</span>
+                </div>
+              </div>
             </div>
-            <input type="hidden" name="heure" id="heureInput" required />
           </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn btn-gold mt-4 px-4" id="btnStep1" disabled onclick="goStep(2)">
+          Suivant <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
 
-          <!-- Note optionnelle -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Note (optionnel)</label>
-            <textarea name="note" class="form-control" rows="2"
-                      placeholder="Ex: je voudrais aussi une barbe..."></textarea>
+      <!-- ÉTAPE 2 : Suppléments -->
+      <div class="step-block d-none" id="step2">
+        <h5 class="fw-semibold mb-1">Suppléments (optionnel)</h5>
+        <p class="text-muted small mb-3">Ajoutez des options à votre service. Le prix se met à jour automatiquement.</p>
+        <div class="row g-3">
+          {% for supp in supplements %}
+          <div class="col-sm-6">
+            <label class="supp-card d-flex align-items-center gap-3 p-3 border rounded-3 cursor-pointer w-100">
+              <input type="checkbox" name="supplements" value="{{ supp.id }}" class="supp-check form-check-input mt-0" data-prix="{{ supp.prix }}" data-nom="{{ supp.nom }}" style="width:20px;height:20px;">
+              <div class="flex-fill">
+                <div class="fw-semibold">{{ supp.nom }}</div>
+                <div class="text-muted small">+ {{ supp.prix|int }} FCFA</div>
+              </div>
+            </label>
           </div>
+          {% endfor %}
+        </div>
 
-          <button type="submit" class="btn btn-gold w-100 py-2" id="btnSubmit" disabled>
+        <!-- Récap prix -->
+        <div class="card border-0 bg-light mt-4 p-3 rounded-3" id="recapPrix">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Service</span><span id="recapService">—</span>
+          </div>
+          <div id="recapSuppsContainer"></div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between fw-bold">
+            <span>Total</span><span id="recapTotal" class="text-warning">—</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(1)">
+            <i class="bi bi-arrow-left"></i> Retour
+          </button>
+          <button type="button" class="btn btn-gold px-4" onclick="goStep(3)">
+            Suivant <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 3 : Créneau -->
+      <div class="step-block d-none" id="step3">
+        <h5 class="fw-semibold mb-3">Choisissez une date et un créneau</h5>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Date</label>
+          <input type="date" id="dateInput" class="form-control" style="max-width:260px;" required/>
+        </div>
+        <div id="creneauxContainer">
+          <p class="text-muted small">Sélectionnez une date pour voir les créneaux disponibles.</p>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(2)">
+            <i class="bi bi-arrow-left"></i> Retour
+          </button>
+          <button type="button" class="btn btn-gold px-4" id="btnStep3" disabled onclick="goStep(4)">
+            Suivant <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 4 : Confirmation -->
+      <div class="step-block d-none" id="step4">
+        <h5 class="fw-semibold mb-3">Confirmez votre réservation</h5>
+        <div class="card border-0 shadow-sm p-4 mb-4">
+          <div class="row g-2">
+            <div class="col-6 text-muted small">Service</div>
+            <div class="col-6 fw-semibold" id="confService">—</div>
+            <div class="col-6 text-muted small">Suppléments</div>
+            <div class="col-6 fw-semibold" id="confSupps">Aucun</div>
+            <div class="col-6 text-muted small">Date</div>
+            <div class="col-6 fw-semibold" id="confDate">—</div>
+            <div class="col-6 text-muted small">Heure</div>
+            <div class="col-6 fw-semibold" id="confHeure">—</div>
+            <div class="col-6 text-muted small">Durée</div>
+            <div class="col-6 fw-semibold" id="confDuree">—</div>
+            <hr class="my-2">
+            <div class="col-6 fw-bold">Total</div>
+            <div class="col-6 fw-bold text-warning fs-5" id="confTotal">—</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Note pour le coiffeur (optionnel)</label>
+          <textarea name="note" class="form-control" rows="2" placeholder="Ex: je voudrais aussi une barbe..."></textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(3)">
+            <i class="bi bi-arrow-left"></i> Retour
+          </button>
+          <button type="submit" class="btn btn-gold px-5 py-2">
             <i class="bi bi-send"></i> Envoyer la demande
           </button>
-        </form>
+        </div>
       </div>
-    </div>
+
+    </form>
   </div>
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.step-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  background: #f0f0f0;
+  color: #888;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.step-pill.active {
+  background: var(--salon-gold, #c9a84c);
+  color: #fff;
+}
+.service-card { cursor: pointer; transition: all .2s; border: 2px solid transparent !important; }
+.service-card.selected { border: 2px solid #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.2) !important; }
+.service-card:hover { transform: translateY(-2px); }
+.supp-card { cursor: pointer; transition: all .15s; }
+.supp-card:has(input:checked) { background: rgba(201,168,76,.08); border-color: #c9a84c !important; }
+.btn-creneau { min-width: 72px; }
+.btn-creneau.selected { background: #c9a84c; color: #fff; border-color: #c9a84c; }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-const serviceSelect = document.getElementById('serviceSelect');
-const dateInput = document.getElementById('dateInput');
-const creneauxContainer = document.getElementById('creneauxContainer');
-const heureInput = document.getElementById('heureInput');
-const btnSubmit = document.getElementById('btnSubmit');
-const infoService = document.getElementById('infoService');
-
-// Date minimum = aujourd'hui
 const today = new Date().toISOString().split('T')[0];
-dateInput.min = today;
+document.getElementById('dateInput').min = today;
 
-function chargerCreneaux() {
-  const serviceId = serviceSelect.value;
-  const date = dateInput.value;
+let selectedService = null;
+let selectedHeure = null;
 
-  if (!serviceId || !date) return;
+// ── Étapes ───────────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.step-block').forEach(b => b.classList.add('d-none'));
+  document.getElementById('step' + n).classList.remove('d-none');
+  document.querySelectorAll('.step-pill').forEach((p, i) => {
+    p.classList.toggle('active', i < n);
+  });
+  if (n === 4) remplirConfirmation();
+}
 
-  // Info durée
-  const opt = serviceSelect.selectedOptions[0];
-  infoService.textContent = `Durée : ${opt.dataset.duree} min`;
+// ── Étape 1 : sélection service ───────────────────────
+document.querySelectorAll('.service-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedService = {
+      id: card.dataset.id,
+      nom: card.dataset.nom,
+      prix: parseFloat(card.dataset.prix),
+      duree: card.dataset.duree
+    };
+    document.getElementById('hidServiceId').value = selectedService.id;
+    document.getElementById('btnStep1').disabled = false;
+    majRecapPrix();
+  });
+});
 
-  creneauxContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-warning" role="status"></div> Chargement...';
-  heureInput.value = '';
-  btnSubmit.disabled = true;
+// ── Étape 2 : suppléments + recap prix ───────────────
+function majRecapPrix() {
+  if (!selectedService) return;
+  let total = selectedService.prix;
+  let suppsHtml = '';
+  document.querySelectorAll('.supp-check:checked').forEach(cb => {
+    const p = parseFloat(cb.dataset.prix);
+    total += p;
+    suppsHtml += `<div class="d-flex justify-content-between small text-muted mb-1">
+      <span>${cb.dataset.nom}</span><span>+ ${p.toLocaleString()} FCFA</span></div>`;
+  });
+  document.getElementById('recapService').textContent = selectedService.prix.toLocaleString() + ' FCFA';
+  document.getElementById('recapSuppsContainer').innerHTML = suppsHtml;
+  document.getElementById('recapTotal').textContent = total.toLocaleString() + ' FCFA';
+}
+document.querySelectorAll('.supp-check').forEach(cb => cb.addEventListener('change', majRecapPrix));
 
-  fetch(`/client/creneaux-disponibles?service_id=${serviceId}&date=${date}`)
+// ── Étape 3 : créneaux ────────────────────────────────
+document.getElementById('dateInput').addEventListener('change', function() {
+  if (!selectedService) return;
+  const container = document.getElementById('creneauxContainer');
+  container.innerHTML = '<div class="spinner-border spinner-border-sm text-warning"></div> Chargement...';
+  document.getElementById('hidDate').value = this.value;
+  selectedHeure = null;
+  document.getElementById('btnStep3').disabled = true;
+
+  fetch(`/client/creneaux-disponibles?service_id=${selectedService.id}&date=${this.value}`)
     .then(r => r.json())
     .then(data => {
-      if (data.error) {
-        creneauxContainer.innerHTML = `<p class="text-danger small">${data.error}</p>`;
+      if (!data.creneaux.length) {
+        container.innerHTML = '<p class="text-warning small"><i class="bi bi-exclamation-triangle"></i> Aucun créneau disponible ce jour. Essayez une autre date.</p>';
         return;
       }
-      if (data.creneaux.length === 0) {
-        creneauxContainer.innerHTML = '<p class="text-warning small"><i class="bi bi-exclamation-triangle"></i> Aucun créneau disponible ce jour-là. Essayez une autre date.</p>';
-        return;
-      }
-
       let html = '<div class="d-flex flex-wrap gap-2">';
       data.creneaux.forEach(h => {
         html += `<button type="button" class="btn btn-outline-secondary btn-creneau" data-heure="${h}">${h}</button>`;
       });
       html += '</div>';
-      creneauxContainer.innerHTML = html;
+      container.innerHTML = html;
 
-      // Sélection d'un créneau
-      document.querySelectorAll('.btn-creneau').forEach(btn => {
+      container.querySelectorAll('.btn-creneau').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.btn-creneau').forEach(b => b.classList.remove('btn-gold', 'active'));
-          btn.classList.add('btn-gold', 'active');
-          heureInput.value = btn.dataset.heure;
-          btnSubmit.disabled = false;
+          container.querySelectorAll('.btn-creneau').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedHeure = btn.dataset.heure;
+          document.getElementById('hidHeure').value = selectedHeure;
+          document.getElementById('btnStep3').disabled = false;
         });
       });
-    })
-    .catch(() => {
-      creneauxContainer.innerHTML = '<p class="text-danger small">Erreur lors du chargement des créneaux.</p>';
     });
-}
+});
 
-serviceSelect.addEventListener('change', chargerCreneaux);
-dateInput.addEventListener('change', chargerCreneaux);
+// ── Étape 4 : confirmation ────────────────────────────
+function remplirConfirmation() {
+  if (!selectedService) return;
+  let total = selectedService.prix;
+  let suppsNoms = [];
+  document.querySelectorAll('.supp-check:checked').forEach(cb => {
+    total += parseFloat(cb.dataset.prix);
+    suppsNoms.push(cb.dataset.nom);
+  });
+  document.getElementById('confService').textContent = selectedService.nom;
+  document.getElementById('confSupps').textContent = suppsNoms.length ? suppsNoms.join(', ') : 'Aucun';
+  document.getElementById('confDate').textContent = document.getElementById('dateInput').value;
+  document.getElementById('confHeure').textContent = selectedHeure;
+  document.getElementById('confDuree').textContent = selectedService.duree + ' min';
+  document.getElementById('confTotal').textContent = total.toLocaleString() + ' FCFA';
+}
 </script>
 {% endblock %}
