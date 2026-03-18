@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Coiffeur – MonSalon{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="bi bi-grid text-warning"></i> Dashboard coiffeur</h2>
+
+<!-- STATS RAPIDES -->
+<div class="row g-3 mb-5">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-warning">{{ rdv_attente|length }}</div>
+      <div class="small text-muted">En attente</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-success">{{ rdv_acceptes|length }}</div>
+      <div class="small text-muted">Confirmés</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <a href="{{ url_for('admin.services') }}" class="text-decoration-none">
+        <div class="fs-2 fw-bold text-primary"><i class="bi bi-scissors"></i></div>
+        <div class="small text-muted">Gérer services</div>
+      </a>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <a href="https://wa.me/22890000000" class="text-decoration-none" target="_blank">
+        <div class="fs-2 fw-bold text-success"><i class="bi bi-whatsapp"></i></div>
+        <div class="small text-muted">WhatsApp</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- DEMANDES EN ATTENTE -->
+<h4 class="fw-bold mb-3">
+  <i class="bi bi-hourglass-split text-warning"></i> Demandes en attente
+  {% if rdv_attente %}
+    <span class="badge bg-warning text-dark ms-2">{{ rdv_attente|length }}</span>
+  {% endif %}
+</h4>
+
+{% if rdv_attente %}
+  <div class="row g-3 mb-5">
+    {% for rdv in rdv_attente %}
+      <div class="col-md-6">
+        <div class="card border-warning border-start border-4 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <strong>{{ rdv.service.nom }}</strong>
+              <span class="text-muted small">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
+            </div>
+            <p class="small text-muted mb-1">
+              <i class="bi bi-person"></i> {{ rdv.client.nom }} — {{ rdv.client.email }}
+            </p>
+            <p class="small text-muted mb-1">
+              <i class="bi bi-clock"></i>
+              {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}
+              ({{ rdv.duree_minutes }} min)
+            </p>
+            {% if rdv.note_client %}
+              <p class="small fst-italic text-muted mb-2">
+                <i class="bi bi-chat-left-text"></i> {{ rdv.note_client }}
+              </p>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-3">
+              <form method="POST" action="{{ url_for('admin.accepter_rdv', rdv_id=rdv.id) }}" class="flex-fill">
+                <button type="submit" class="btn btn-success w-100 btn-sm">
+                  <i class="bi bi-check-lg"></i> Accepter
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.refuser_rdv', rdv_id=rdv.id) }}" class="flex-fill">
+                <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
+                  <i class="bi bi-x-lg"></i> Refuser
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-light border mb-5">
+    <i class="bi bi-check-circle text-success"></i> Aucune demande en attente.
+  </div>
+{% endif %}
+
+<!-- PLANNING DU JOUR (RDV ACCEPTÉS) -->
+<h4 class="fw-bold mb-3">
+  <i class="bi bi-calendar-check text-success"></i> Planning confirmé
+</h4>
+
+{% if rdv_acceptes %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Date</th>
+          <th>Horaire</th>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Durée</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rdv in rdv_acceptes %}
+          <tr>
+            <td>{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</td>
+            <td>
+              <span class="badge bg-success">
+                {{ rdv.debut_datetime.strftime('%H:%M') }} – {{ rdv.fin_datetime.strftime('%H:%M') }}
+              </span>
+            </td>
+            <td>{{ rdv.client.nom }}</td>
+            <td>{{ rdv.service.nom }}</td>
+            <td>{{ rdv.duree_minutes }} min</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-light border">
+    <i class="bi bi-calendar-x"></i> Aucun rendez-vous confirmé.
+  </div>
+{% endif %}
+{% endblock %}

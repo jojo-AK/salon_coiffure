@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Mes rendez-vous – MonSalon{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0"><i class="bi bi-calendar-check text-warning"></i> Mes rendez-vous</h2>
+  <a href="{{ url_for('client.reserver') }}" class="btn btn-gold">
+    <i class="bi bi-plus-lg"></i> Nouveau RDV
+  </a>
+</div>
+
+{% if rendezvous %}
+  <div class="row g-3">
+    {% for rdv in rendezvous %}
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0">{{ rdv.service.nom }}</h6>
+              {% if rdv.statut == 'en_attente' %}
+                <span class="badge bg-warning text-dark">
+                  <i class="bi bi-hourglass-split"></i> En attente
+                </span>
+              {% elif rdv.statut == 'accepte' %}
+                <span class="badge bg-success">
+                  <i class="bi bi-check-circle"></i> Confirmé
+                </span>
+              {% else %}
+                <span class="badge bg-danger">
+                  <i class="bi bi-x-circle"></i> Refusé
+                </span>
+              {% endif %}
+            </div>
+
+            <p class="text-muted small mb-1">
+              <i class="bi bi-calendar3 me-1"></i>
+              {{ rdv.debut_datetime.strftime('%A %d %B %Y') }}
+            </p>
+            <p class="text-muted small mb-1">
+              <i class="bi bi-clock me-1"></i>
+              {{ rdv.debut_datetime.strftime('%H:%M') }} →
+              {{ rdv.fin_datetime.strftime('%H:%M') }}
+              ({{ rdv.duree_minutes }} min)
+            </p>
+            {% if rdv.note_client %}
+              <p class="text-muted small mb-0 fst-italic">
+                <i class="bi bi-chat-left-text me-1"></i> {{ rdv.note_client }}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-calendar-x" style="font-size: 3rem; color: #ccc;"></i>
+    <p class="text-muted mt-3">Vous n'avez aucun rendez-vous pour l'instant.</p>
+    <a href="{{ url_for('client.reserver') }}" class="btn btn-gold mt-2">
+      Prendre un rendez-vous
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

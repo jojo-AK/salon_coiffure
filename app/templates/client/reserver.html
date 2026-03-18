@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Réserver – MonSalon{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h2 class="fw-bold mb-1"><i class="bi bi-calendar-plus text-warning"></i> Réserver un rendez-vous</h2>
+    <p class="text-muted mb-4">Choisissez un service, une date et un créneau disponible.</p>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" id="formRDV">
+
+          <!-- Étape 1 : Choix du service -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-warning text-dark me-2">1</span> Service
+            </label>
+            <select name="service_id" id="serviceSelect" class="form-select" required>
+              <option value="">-- Choisissez un service --</option>
+              {% for service in services %}
+                <option value="{{ service.id }}"
+                  data-duree="{{ service.duree_minutes }}"
+                  {% if request.args.get('service_id')|int == service.id %}selected{% endif %}>
+                  {{ service.nom }} — {{ service.prix|int }} FCFA ({{ service.duree_minutes }} min)
+                </option>
+              {% endfor %}
+            </select>
+            <div id="infoService" class="form-text text-muted mt-1"></div>
+          </div>
+
+          <!-- Étape 2 : Choix de la date -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-warning text-dark me-2">2</span> Date
+            </label>
+            <input type="date" name="date" id="dateInput" class="form-control" required
+                   min="{{ today }}" />
+          </div>
+
+          <!-- Étape 3 : Choix du créneau (chargé en AJAX) -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-warning text-dark me-2">3</span> Créneau disponible
+            </label>
+            <div id="creneauxContainer">
+              <p class="text-muted small">Sélectionnez un service et une date pour voir les créneaux.</p>
+            </div>
+            <input type="hidden" name="heure" id="heureInput" required />
+          </div>
+
+          <!-- Note optionnelle -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Note (optionnel)</label>
+            <textarea name="note" class="form-control" rows="2"
+                      placeholder="Ex: je voudrais aussi une barbe..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2" id="btnSubmit" disabled>
+            <i class="bi bi-send"></i> Envoyer la demande
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const serviceSelect = document.getElementById('serviceSelect');
+const dateInput = document.getElementById('dateInput');
+const creneauxContainer = document.getElementById('creneauxContainer');
+const heureInput = document.getElementById('heureInput');
+const btnSubmit = document.getElementById('btnSubmit');
+const infoService = document.getElementById('infoService');
+
+// Date minimum = aujourd'hui
+const today = new Date().toISOString().split('T')[0];
+dateInput.min = today;
+
+function chargerCreneaux() {
+  const serviceId = serviceSelect.value;
+  const date = dateInput.value;
+
+  if (!serviceId || !date) return;
+
+  // Info durée
+  const opt = serviceSelect.selectedOptions[0];
+  infoService.textContent = `Durée : ${opt.dataset.duree} min`;
+
+  creneauxContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-warning" role="status"></div> Chargement...';
+  heureInput.value = '';
+  btnSubmit.disabled = true;
+
+  fetch(`/client/creneaux-disponibles?service_id=${serviceId}&date=${date}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        creneauxContainer.innerHTML = `<p class="text-danger small">${data.error}</p>`;
+        return;
+      }
+      if (data.creneaux.length === 0) {
+        creneauxContainer.innerHTML = '<p class="text-warning small"><i class="bi bi-exclamation-triangle"></i> Aucun créneau disponible ce jour-là. Essayez une autre date.</p>';
+        return;
+      }
+
+      let html = '<div class="d-flex flex-wrap gap-2">';
+      data.creneaux.forEach(h => {
+        html += `<button type="button" class="btn btn-outline-secondary btn-creneau" data-heure="${h}">${h}</button>`;
+      });
+      html += '</div>';
+      creneauxContainer.innerHTML = html;
+
+      // Sélection d'un créneau
+      document.querySelectorAll('.btn-creneau').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-creneau').forEach(b => b.classList.remove('btn-gold', 'active'));
+          btn.classList.add('btn-gold', 'active');
+          heureInput.value = btn.dataset.heure;
+          btnSubmit.disabled = false;
+        });
+      });
+    })
+    .catch(() => {
+      creneauxContainer.innerHTML = '<p class="text-danger small">Erreur lors du chargement des créneaux.</p>';
+    });
+}
+
+serviceSelect.addEventListener('change', chargerCreneaux);
+dateInput.addEventListener('change', chargerCreneaux);
+</script>
+{% endblock %}

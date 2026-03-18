@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Salon de Coiffure{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --salon-gold: #c9a84c;
+      --salon-dark: #1a1a1a;
+      --salon-light: #f9f6f0;
+    }
+    body { background-color: var(--salon-light); font-family: 'Segoe UI', sans-serif; }
+    .navbar { background-color: var(--salon-dark) !important; }
+    .navbar-brand { color: var(--salon-gold) !important; font-weight: 700; letter-spacing: 1px; }
+    .nav-link { color: #ccc !important; }
+    .nav-link:hover, .nav-link.active { color: var(--salon-gold) !important; }
+    .btn-gold { background-color: var(--salon-gold); color: #fff; border: none; }
+    .btn-gold:hover { background-color: #b8943e; color: #fff; }
+    .badge-attente { background-color: #f0ad4e; }
+    footer { background-color: var(--salon-dark); color: #aaa; }
+    .flash-messages { position: sticky; top: 56px; z-index: 999; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('client.vitrine') }}">
+      <i class="bi bi-scissors"></i> MonSalon
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('client.vitrine') }}">
+            <i class="bi bi-house"></i> Accueil
+          </a>
+        </li>
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin() %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                <i class="bi bi-grid"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('admin.services') }}">
+                <i class="bi bi-scissors"></i> Services
+              </a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('client.reserver') }}">
+                <i class="bi bi-calendar-plus"></i> Réserver
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('client.mes_rendezvous') }}">
+                <i class="bi bi-calendar-check"></i> Mes RDV
+              </a>
+            </li>
+          {% endif %}
+        {% endif %}
+      </ul>
+
+      <ul class="navbar-nav ms-auto">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> {{ current_user.nom }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text text-muted small">{{ current_user.email }}</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                  <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </a>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">
+              <i class="bi bi-box-arrow-in-right"></i> Connexion
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-gold ms-2" href="{{ url_for('auth.register') }}">
+              S'inscrire
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div class="flash-messages">
+  <div class="container mt-2">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show mb-1" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+</div>
+
+<!-- CONTENU PRINCIPAL -->
+<main class="container py-4">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="py-4 mt-5">
+  <div class="container text-center">
+    <p class="mb-1"><i class="bi bi-scissors text-warning"></i> MonSalon &copy; {{ 2025 }}</p>
+    <p class="small mb-0">
+      <a href="https://wa.me/22890000000" class="text-success text-decoration-none" target="_blank">
+        <i class="bi bi-whatsapp"></i> Contactez-nous sur WhatsApp
+      </a>
+    </p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
