@@ -3,84 +3,88 @@
 
 {% block content %}
 
-<!-- HERO -->
-<div class="text-center py-5 mb-4 rounded-4" style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
-  <i class="bi bi-scissors" style="font-size: 3rem; color: var(--salon-gold);"></i>
-  <h1 class="mt-3 fw-bold">Bienvenue chez MonSalon</h1>
-  <p class="lead text-secondary mb-4">Votre coiffeur de confiance – Réservation rapide et sans attente</p>
-  <div class="d-flex gap-3 justify-content-center flex-wrap">
-    {% if current_user.is_authenticated %}
-      <a href="{{ url_for('client.reserver') }}" class="btn btn-gold btn-lg px-4">
-        <i class="bi bi-calendar-plus"></i> Réserver maintenant
-      </a>
-    {% else %}
-      <a href="{{ url_for('auth.register') }}" class="btn btn-gold btn-lg px-4">
-        <i class="bi bi-calendar-plus"></i> Réserver maintenant
-      </a>
-      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
-        Déjà client ? Connexion
-      </a>
-    {% endif %}
-    <a href="https://wa.me/22890000000" target="_blank" class="btn btn-success btn-lg px-4">
-      <i class="bi bi-whatsapp"></i> WhatsApp
-    </a>
-  </div>
+<!-- HERO compact -->
+<div class="text-center py-4 mb-5 rounded-4"
+  style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
+  <i class="bi bi-scissors" style="font-size: 2.5rem; color: var(--salon-gold);"></i>
+  <h1 class="mt-2 fw-bold fs-3">Bienvenue chez SHEGEY CUT</h1>
+  <p class="text-secondary mb-3">Choisissez votre coupe et réservez en quelques clics</p>
+  <a href="https://wa.me/22890000000" target="_blank" class="btn btn-success btn-sm px-3">
+    <i class="bi bi-whatsapp"></i> Nous contacter
+  </a>
 </div>
 
-<!-- SERVICES -->
-<h2 class="fw-bold mb-4"><i class="bi bi-scissors text-warning"></i> Nos services</h2>
+<!-- TITRE SECTION -->
+<h2 class="fw-bold mb-4 text-center">
+  <i class="bi bi-scissors text-warning"></i> Nos services
+</h2>
 
 {% if services %}
-  <div class="row g-4">
-    {% for service in services %}
-      <div class="col-sm-6 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="card-title fw-semibold mb-0">{{ service.nom }}</h5>
-              <span class="badge text-bg-warning fs-6">{{ service.prix|int }} FCFA</span>
-            </div>
-            {% if service.description %}
-              <p class="card-text text-muted small">{{ service.description }}</p>
-            {% endif %}
-            <div class="d-flex align-items-center text-muted mt-3">
-              <i class="bi bi-clock me-2"></i>
-              <span>{{ service.duree_minutes }} min</span>
-            </div>
-          </div>
-          <div class="card-footer bg-transparent border-0 pb-3">
-            {% if current_user.is_authenticated and not current_user.is_admin() %}
-              <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}"
-                 class="btn btn-gold w-100">
-                Réserver ce service
-              </a>
-            {% elif not current_user.is_authenticated %}
-              <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary w-100">
-                S'inscrire pour réserver
-              </a>
-            {% endif %}
-          </div>
+<div class="row g-4">
+  {% for service in services %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="card h-100 border-0 shadow-sm service-card-vitrine">
+
+      <!-- Photo ou placeholder -->
+      {% if service.photo %}
+      <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top"
+        style="height: 200px; object-fit: cover;" alt="{{ service.nom }}">
+      {% else %}
+      <div class="d-flex align-items-center justify-content-center"
+        style="height: 200px; background: linear-gradient(135deg, #2a2a2a, #3a3a3a);">
+        <i class="bi bi-scissors" style="font-size: 3.5rem; color: var(--salon-gold);"></i>
+      </div>
+      {% endif %}
+
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h5 class="card-title fw-bold mb-0">{{ service.nom }}</h5>
+          <span class="badge bg-warning text-dark fs-6 ms-2">{{ service.prix|int }} FCFA</span>
+        </div>
+
+        {% if service.description %}
+        <p class="card-text text-muted small flex-fill">{{ service.description }}</p>
+        {% endif %}
+
+        <div class="d-flex align-items-center justify-content-between mt-3">
+          <span class="text-muted small">
+            <i class="bi bi-clock me-1"></i>{{ service.duree_minutes }} min
+          </span>
+
+          {% if current_user.is_authenticated and not current_user.is_admin() %}
+          <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}" class="btn btn-gold btn-sm px-3">
+            <i class="bi bi-calendar-plus"></i> Réserver
+          </a>
+          {% elif not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.register') }}" class="btn btn-outline-warning btn-sm px-3">
+            <i class="bi bi-calendar-plus"></i> Réserver
+          </a>
+          {% endif %}
         </div>
       </div>
-    {% endfor %}
+    </div>
   </div>
+  {% endfor %}
+</div>
+
 {% else %}
-  <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> Aucun service disponible pour le moment.
-  </div>
+<div class="text-center py-5">
+  <i class="bi bi-scissors" style="font-size: 3rem; color: #ccc;"></i>
+  <p class="text-muted mt-3">Aucun service disponible pour le moment.</p>
+</div>
 {% endif %}
 
-<!-- INFOS PRATIQUES -->
-<div class="row g-4 mt-5">
+<!-- INFOS BAS DE PAGE -->
+<div class="row g-4 mt-5 pt-3 border-top">
   <div class="col-md-4 text-center">
     <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
     <h6 class="mt-2 fw-semibold">Horaires</h6>
-    <p class="text-muted small">Lun – Sam : 8h – 20h</p>
+    <p class="text-muted small mb-0">Lun – Sam : 8h – 20h</p>
   </div>
   <div class="col-md-4 text-center">
     <i class="bi bi-geo-alt text-warning" style="font-size: 2rem;"></i>
     <h6 class="mt-2 fw-semibold">Adresse</h6>
-    <p class="text-muted small">Lomé, Togo</p>
+    <p class="text-muted small mb-0">Lomé, Togo</p>
   </div>
   <div class="col-md-4 text-center">
     <i class="bi bi-whatsapp text-success" style="font-size: 2rem;"></i>
@@ -89,4 +93,53 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .service-card-vitrine {
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .service-card-vitrine:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12) !important;
+  }
+</style>
+{% endblock %}
+
+<!-- Bouton WhatsApp flottant -->
+{% block extra_js %}
+<style>
+  .whatsapp-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    width: 52px;
+    height: 52px;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+    transition: transform .2s;
+  }
+
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+  }
+
+  .whatsapp-float i {
+    font-size: 1.6rem;
+    color: white;
+  }
+</style>
+<a href="https://wa.me/22890000000" target="_blank" class="whatsapp-float" title="Nous contacter sur WhatsApp">
+  <i class="bi bi-whatsapp"></i>
+</a>
 {% endblock %}
