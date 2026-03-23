@@ -14,7 +14,7 @@ with app.app_context():
     db.session.add(coiffeur)
 
     # Client test
-    client = User(nom='Client Test', email='client@test.com', role='client')
+    client = User(nom='Client Test', email='client@test.com', telephone='+228 90 12 34 56', role='client')
     client.set_password('client123')
     db.session.add(client)
 

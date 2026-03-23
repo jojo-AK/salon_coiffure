@@ -4,31 +4,31 @@
 {% block content %}
 
 <!-- HERO compact -->
-<div class="text-center py-4 mb-5 rounded-4"
+<div class="text-center py-3 py-md-4 mb-4 mb-md-5 rounded-4 px-2"
   style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
-  <i class="bi bi-scissors" style="font-size: 2.5rem; color: var(--salon-gold);"></i>
-  <h1 class="mt-2 fw-bold fs-3">Bienvenue chez SHEGEY CUT</h1>
-  <p class="text-secondary mb-3">Choisissez votre coupe et réservez en quelques clics</p>
-  <a href="https://wa.me/22890000000" target="_blank" class="btn btn-success btn-sm px-3">
+  <i class="bi bi-scissors" style="font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--salon-gold);"></i>
+  <h1 class="mt-2 fw-bold fs-4 fs-md-3">Bienvenue chez {{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}</h1>
+  <p class="text-secondary mb-3 small">Choisissez votre coupe et réservez en quelques clics</p>
+  <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank" class="btn btn-success btn-sm px-3">
     <i class="bi bi-whatsapp"></i> Nous contacter
   </a>
 </div>
 
 <!-- TITRE SECTION -->
-<h2 class="fw-bold mb-4 text-center">
+<h2 class="fw-bold mb-3 mb-md-4 text-center fs-5 fs-md-4">
   <i class="bi bi-scissors text-warning"></i> Nos services
 </h2>
 
 {% if services %}
-<div class="row g-4">
+<div class="row g-3 g-md-4">
   {% for service in services %}
-  <div class="col-sm-6 col-lg-4">
+  <div class="col-12 col-sm-6 col-lg-4">
     <div class="card h-100 border-0 shadow-sm service-card-vitrine">
 
       <!-- Photo ou placeholder -->
       {% if service.photo %}
-      <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top"
-        style="height: 200px; object-fit: cover;" alt="{{ service.nom }}">
+      <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top img-fluid"
+        style="height: 180px; min-height: 160px; object-fit: cover;" alt="{{ service.nom }}">
       {% else %}
       <div class="d-flex align-items-center justify-content-center"
         style="height: 200px; background: linear-gradient(135deg, #2a2a2a, #3a3a3a);">
@@ -75,21 +75,21 @@
 {% endif %}
 
 <!-- INFOS BAS DE PAGE -->
-<div class="row g-4 mt-5 pt-3 border-top">
-  <div class="col-md-4 text-center">
-    <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
+<div class="row g-4 mt-4 mt-md-5 pt-3 border-top">
+  <div class="col-12 col-md-4 text-center">
+    <i class="bi bi-clock-history text-warning" style="font-size: 1.75rem;"></i>
     <h6 class="mt-2 fw-semibold">Horaires</h6>
-    <p class="text-muted small mb-0">Lun – Sam : 8h – 20h</p>
+    <p class="text-muted small mb-0">{{ profil_salon.horaires or 'Lun – Sam : 8h – 20h' }}</p>
   </div>
-  <div class="col-md-4 text-center">
-    <i class="bi bi-geo-alt text-warning" style="font-size: 2rem;"></i>
+  <div class="col-12 col-md-4 text-center">
+    <i class="bi bi-geo-alt text-warning" style="font-size: 1.75rem;"></i>
     <h6 class="mt-2 fw-semibold">Adresse</h6>
-    <p class="text-muted small mb-0">Lomé, Togo</p>
+    <p class="text-muted small mb-0">{{ profil_salon.adresse or 'Lomé, Togo' }}</p>
   </div>
-  <div class="col-md-4 text-center">
-    <i class="bi bi-whatsapp text-success" style="font-size: 2rem;"></i>
+  <div class="col-12 col-md-4 text-center">
+    <i class="bi bi-whatsapp text-success" style="font-size: 1.75rem;"></i>
     <h6 class="mt-2 fw-semibold">Contact rapide</h6>
-    <a href="https://wa.me/22890000000" class="text-success small" target="_blank">+228 90 00 00 00</a>
+    <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" class="text-success small text-break" target="_blank">{{ profil_salon.whatsapp or '+228 90 00 00 00' }}</a>
   </div>
 </div>
 
@@ -116,11 +116,11 @@
 <style>
   .whatsapp-float {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-    width: 52px;
-    height: 52px;
+    bottom: 16px;
+    right: 16px;
+    z-index: 998;
+    width: 48px;
+    height: 48px;
     background: #25d366;
     border-radius: 50%;
     display: flex;
@@ -129,17 +129,21 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
     transition: transform .2s;
   }
-
+  @media (min-width: 576px) {
+    .whatsapp-float { bottom: 24px; right: 24px; width: 52px; height: 52px; }
+  }
   .whatsapp-float:hover {
     transform: scale(1.1);
   }
-
   .whatsapp-float i {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     color: white;
   }
+  @media (min-width: 576px) {
+    .whatsapp-float i { font-size: 1.6rem; }
+  }
 </style>
-<a href="https://wa.me/22890000000" target="_blank" class="whatsapp-float" title="Nous contacter sur WhatsApp">
+<a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank" class="whatsapp-float" title="Nous contacter sur WhatsApp">
   <i class="bi bi-whatsapp"></i>
 </a>
 {% endblock %}

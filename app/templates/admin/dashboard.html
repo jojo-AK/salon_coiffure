@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Dashboard Coiffeur – MonSalon{% endblock %}
-
+{% block extra_css %}
+<style>
+@media (min-width: 768px) {
+  .planning-heure { min-width: 80px !important; padding: 16px 8px !important; }
+}
+</style>
+{% endblock %}
 {% block content %}
-<h2 class="fw-bold mb-4"><i class="bi bi-grid text-warning"></i> Dashboard coiffeur</h2>
+<h2 class="fw-bold mb-3 mb-md-4 fs-5 fs-md-4"><i class="bi bi-grid text-warning"></i> Dashboard coiffeur</h2>
 
 <!-- STATS -->
 <div class="row g-3 mb-5">
@@ -42,7 +48,7 @@
 </h4>
 <div class="row g-3 mb-5">
   {% for rdv in rdv_annulations %}
-  <div class="col-md-6">
+  <div class="col-12 col-md-6">
     <div class="card border-info border-start border-4 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between mb-1">
@@ -52,6 +58,12 @@
         <p class="small text-muted mb-1">
           <i class="bi bi-person"></i> {{ rdv.client.nom }} — {{ rdv.client.email }}
         </p>
+        {% if rdv.client.telephone %}
+        <p class="small text-muted mb-1">
+          <i class="bi bi-telephone"></i>
+          <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
+        </p>
+        {% endif %}
         <p class="small text-muted mb-2">
           <i class="bi bi-clock"></i>
           {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}
@@ -79,12 +91,12 @@
 {% endif %}
 
 <!-- PLANNING DU JOUR -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="fw-bold mb-0">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+  <h4 class="fw-bold mb-0 fs-6 fs-md-5">
     <i class="bi bi-calendar-day text-warning"></i>
     Planning — <span class="text-warning">{{ aujourd_hui }}</span>
   </h4>
-  <div class="d-flex gap-2">
+  <div class="d-flex gap-2 flex-wrap">
     <a href="{{ url_for('admin.dashboard', date=date_precedente) }}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-chevron-left"></i> Hier
     </a>
@@ -100,8 +112,8 @@
     {% if rdv_du_jour %}
     {% for rdv in rdv_du_jour %}
     <div class="d-flex align-items-stretch border-bottom">
-      <div class="d-flex align-items-center justify-content-center fw-bold"
-        style="min-width:80px; background:#f8f9fa; border-right:1px solid #dee2e6; padding:16px 8px;">
+      <div class="d-flex align-items-center justify-content-center fw-bold planning-heure"
+        style="min-width:55px; background:#f8f9fa; border-right:1px solid #dee2e6; padding:12px 6px;">
         {{ rdv.debut_datetime.strftime('%H:%M') }}
       </div>
       <div class="flex-fill p-3
@@ -144,6 +156,12 @@
           <span class="text-muted small">
             <i class="bi bi-envelope"></i> {{ rdv.client.email }}
           </span>
+          {% if rdv.client.telephone %}
+          <span class="text-muted small">
+            <i class="bi bi-telephone"></i>
+            <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
+          </span>
+          {% endif %}
           {% if rdv.note_client %}
           <span class="text-muted small fst-italic">
             <i class="bi bi-chat-left-text"></i> {{ rdv.note_client }}
@@ -199,7 +217,7 @@
 </h4>
 <div class="row g-3">
   {% for rdv in rdv_attente %}
-  <div class="col-md-6">
+  <div class="col-12 col-md-6">
     <div class="card border-warning border-start border-4 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between mb-1">
@@ -207,8 +225,14 @@
           <span class="text-muted small">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
         </div>
         <p class="small text-muted mb-1">
-          <i class="bi bi-person"></i> {{ rdv.client.nom }}
+          <i class="bi bi-person"></i> {{ rdv.client.nom }} — {{ rdv.client.email }}
         </p>
+        {% if rdv.client.telephone %}
+        <p class="small text-muted mb-1">
+          <i class="bi bi-telephone"></i>
+          <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
+        </p>
+        {% endif %}
         <p class="small text-muted mb-2">
           <i class="bi bi-clock"></i>
           {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}

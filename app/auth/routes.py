@@ -12,6 +12,7 @@ def register():
     if request.method == 'POST':
         nom = request.form.get('nom', '').strip()
         email = request.form.get('email', '').strip().lower()
+        telephone = request.form.get('telephone', '').strip() or None
         password = request.form.get('password', '')
         confirm = request.form.get('confirm_password', '')
         if not nom or not email or not password:
@@ -23,7 +24,7 @@ def register():
         if User.query.filter_by(email=email).first():
             flash('Cet email est deja utilise.', 'danger')
             return render_template('auth/register.html')
-        user = User(nom=nom, email=email, role='client')
+        user = User(nom=nom, email=email, telephone=telephone, role='client')
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

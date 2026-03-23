@@ -2,20 +2,20 @@
 {% block title %}Réserver – MonSalon{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-8">
+<div class="row justify-content-center mx-0">
+  <div class="col-12 col-lg-8">
     <h2 class="fw-bold mb-1"><i class="bi bi-calendar-plus text-warning"></i> Réserver un rendez-vous</h2>
     <p class="text-muted mb-4">Suivez les étapes ci-dessous pour finaliser votre réservation.</p>
 
     <!-- Barre de progression -->
-    <div class="d-flex align-items-center mb-4 gap-2" id="progressBar">
-      <div class="step-pill active" id="pill1">1 · Service</div>
-      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
-      <div class="step-pill" id="pill2">2 · Suppléments</div>
-      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
-      <div class="step-pill" id="pill3">3 · Créneau</div>
-      <div class="flex-fill" style="height:2px;background:#dee2e6;"></div>
-      <div class="step-pill" id="pill4">4 · Confirmation</div>
+    <div class="d-flex align-items-center mb-4 gap-1 gap-md-2 overflow-x-auto pb-2" id="progressBar" style="min-width: 0;">
+      <div class="step-pill active flex-shrink-0" id="pill1">1 · Service</div>
+      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
+      <div class="step-pill flex-shrink-0" id="pill2"><span class="d-none d-sm-inline">2 · </span>Suppléments</div>
+      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
+      <div class="step-pill flex-shrink-0" id="pill3"><span class="d-none d-sm-inline">3 · </span>Créneau</div>
+      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
+      <div class="step-pill flex-shrink-0" id="pill4"><span class="d-none d-sm-inline">4 · </span>Confirmation</div>
     </div>
 
     <form method="POST" id="formRDV">
@@ -99,7 +99,7 @@
         <h5 class="fw-semibold mb-3">Choisissez une date et un créneau</h5>
         <div class="mb-3">
           <label class="form-label fw-semibold">Date</label>
-          <input type="date" id="dateInput" class="form-control" style="max-width:260px;" required/>
+          <input type="date" id="dateInput" class="form-control" style="max-width:100%;" required/>
         </div>
         <div id="creneauxContainer">
           <p class="text-muted small">Sélectionnez une date pour voir les créneaux disponibles.</p>
@@ -157,13 +157,16 @@
 {% block extra_css %}
 <style>
 .step-pill {
-  padding: 6px 14px;
+  padding: 5px 10px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
   background: #f0f0f0;
   color: #888;
   white-space: nowrap;
   font-weight: 500;
+}
+@media (min-width: 576px) {
+  .step-pill { padding: 6px 14px; font-size: 13px; }
 }
 .step-pill.active {
   background: var(--salon-gold, #c9a84c);
@@ -174,7 +177,8 @@
 .service-card:hover { transform: translateY(-2px); }
 .supp-card { cursor: pointer; transition: all .15s; }
 .supp-card:has(input:checked) { background: rgba(201,168,76,.08); border-color: #c9a84c !important; }
-.btn-creneau { min-width: 72px; }
+.btn-creneau { min-width: 60px; }
+@media (min-width: 576px) { .btn-creneau { min-width: 72px; } }
 .btn-creneau.selected { background: #c9a84c; color: #fff; border-color: #c9a84c; }
 </style>
 {% endblock %}

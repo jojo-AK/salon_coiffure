@@ -4,7 +4,7 @@
 {% block content %}
 
 <!-- EN-TETE -->
-<div class="text-center py-5 mb-4 rounded-4" style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
+<div class="text-center py-4 py-md-5 mb-4 rounded-4 px-2" style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
   {% if profil.photo_profil %}
     <img src="{{ url_for('static', filename='uploads/' + profil.photo_profil) }}"
          class="rounded-circle shadow mb-3"
@@ -16,7 +16,7 @@
     </div>
   {% endif %}
 
-  <h1 class="fw-bold fs-3 mb-1">{{ profil.nom_salon or 'MonSalon' }}</h1>
+  <h1 class="fw-bold fs-4 fs-md-3 mb-1">{{ profil.nom_salon or 'MonSalon' }}</h1>
   <p class="text-secondary mb-3">{{ profil.bio or 'Votre coiffeur de confiance' }}</p>
 
   <div class="d-flex justify-content-center flex-wrap gap-3 mb-3">
@@ -40,7 +40,7 @@
     {% endif %}
   </div>
 
-  <div class="d-flex justify-content-center gap-3 flex-wrap">
+  <div class="d-flex justify-content-center gap-2 gap-md-3 flex-wrap">
     {% if current_user.is_authenticated and not current_user.is_admin() %}
       <a href="{{ url_for('client.reserver') }}" class="btn btn-gold px-4">
         <i class="bi bi-calendar-plus"></i> Réserver maintenant
@@ -60,7 +60,7 @@
 <!-- PHOTOS INTERIEUR -->
 {% if photos %}
   <h4 class="fw-bold mb-3"><i class="bi bi-images text-warning"></i> Notre salon</h4>
-  <div class="row g-3 mb-5">
+  <div class="row g-2 g-md-3 mb-5">
     {% for photo in photos %}
       <div class="col-6 col-md-4">
         <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
@@ -75,13 +75,13 @@
 <!-- NOS SERVICES -->
 <h4 class="fw-bold mb-3"><i class="bi bi-scissors text-warning"></i> Nos services</h4>
 {% if services %}
-  <div class="row g-3 mb-5">
+  <div class="row g-2 g-md-3 mb-5">
     {% for service in services %}
-      <div class="col-sm-6 col-md-4">
+      <div class="col-12 col-sm-6 col-md-4">
         <div class="card border-0 shadow-sm h-100">
           {% if service.photo %}
             <img src="{{ url_for('static', filename='uploads/' + service.photo) }}"
-                 class="card-img-top" style="height:160px; object-fit:cover;">
+                 class="card-img-top img-fluid" style="height:160px; object-fit:cover;" alt="{{ service.nom }}">
           {% else %}
             <div class="d-flex align-items-center justify-content-center"
                  style="height:160px; background:#2a2a2a;">
@@ -108,17 +108,17 @@
 
 <!-- INFOS PRATIQUES -->
 <div class="row g-4 mt-2 pt-3 border-top">
-  <div class="col-md-4 text-center">
+  <div class="col-12 col-md-4 text-center">
     <i class="bi bi-clock-history text-warning" style="font-size:2rem;"></i>
     <h6 class="mt-2 fw-semibold">Horaires</h6>
     <p class="text-muted small mb-0">{{ profil.horaires or 'Lun – Sam : 8h – 20h' }}</p>
   </div>
-  <div class="col-md-4 text-center">
+  <div class="col-12 col-md-4 text-center">
     <i class="bi bi-geo-alt text-warning" style="font-size:2rem;"></i>
     <h6 class="mt-2 fw-semibold">Adresse</h6>
     <p class="text-muted small mb-0">{{ profil.adresse or 'Lomé, Togo' }}</p>
   </div>
-  <div class="col-md-4 text-center">
+  <div class="col-12 col-md-4 text-center">
     <i class="bi bi-whatsapp text-success" style="font-size:2rem;"></i>
     <h6 class="mt-2 fw-semibold">Contact</h6>
     <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"

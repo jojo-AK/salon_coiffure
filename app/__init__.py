@@ -49,4 +49,14 @@ def create_app(config_name='default'):
     with app.app_context():
         db.create_all()
 
+    @app.context_processor
+    def inject_profil_salon():
+        """Injecte le profil salon dans tous les templates (nom, whatsapp...) pour que le client voie ce que l'admin configure."""
+        try:
+            from app.models import ProfilSalon
+            profil = ProfilSalon.get()
+            return {'profil_salon': profil}
+        except Exception:
+            return {'profil_salon': None}
+
     return app

@@ -12,9 +12,11 @@
       --salon-dark: #1a1a1a;
       --salon-light: #f9f6f0;
     }
-    body { background-color: var(--salon-light); font-family: 'Segoe UI', sans-serif; }
+    html { overflow-x: hidden; }
+    body { background-color: var(--salon-light); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
     .navbar { background-color: var(--salon-dark) !important; }
-    .navbar-brand { color: var(--salon-gold) !important; font-weight: 700; letter-spacing: 1px; }
+    .navbar-brand { color: var(--salon-gold) !important; font-weight: 700; letter-spacing: 1px; max-width: 70%; }
+    .navbar-brand .brand-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; max-width: 100%; }
     .nav-link { color: #ccc !important; }
     .nav-link:hover, .nav-link.active { color: var(--salon-gold) !important; }
     .btn-gold { background-color: var(--salon-gold); color: #fff; border: none; }
@@ -22,6 +24,13 @@
     .badge-attente { background-color: #f0ad4e; }
     footer { background-color: var(--salon-dark); color: #aaa; }
     .flash-messages { position: sticky; top: 56px; z-index: 999; }
+    @media (max-width: 991.98px) {
+      .flash-messages { top: 0; }
+      .navbar .btn-gold { margin-left: 0 !important; margin-top: 0.5rem; }
+    }
+    @media (max-width: 575.98px) {
+      .navbar-brand { font-size: 1rem; max-width: 60%; }
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
@@ -30,8 +39,9 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container">
-    <a class="navbar-brand" href="{{ url_for('client.vitrine') }}">
-      <i class="bi bi-scissors"></i> MonSalon
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('client.vitrine') }}">
+      <i class="bi bi-scissors flex-shrink-0 me-1"></i>
+      <span class="brand-text">{{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>
@@ -99,7 +109,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="btn btn-gold ms-2" href="{{ url_for('auth.register') }}">
+            <a class="btn btn-gold ms-lg-2 mt-2 mt-lg-0" href="{{ url_for('auth.register') }}">
               S'inscrire
             </a>
           </li>
@@ -124,16 +134,16 @@
 </div>
 
 <!-- CONTENU PRINCIPAL -->
-<main class="container py-4">
+<main class="container py-3 py-md-4 px-2 px-sm-3">
   {% block content %}{% endblock %}
 </main>
 
 <!-- FOOTER -->
-<footer class="py-4 mt-5">
-  <div class="container text-center">
-    <p class="mb-1"><i class="bi bi-scissors text-warning"></i> MonSalon &copy; {{ 2025 }}</p>
+<footer class="py-3 py-md-4 mt-4 mt-md-5">
+  <div class="container text-center px-2">
+    <p class="mb-1"><i class="bi bi-scissors text-warning"></i> {{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }} &copy; {{ 2025 }}</p>
     <p class="small mb-0">
-      <a href="https://wa.me/22890000000" class="text-success text-decoration-none" target="_blank">
+      <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" class="text-success text-decoration-none" target="_blank">
         <i class="bi bi-whatsapp"></i> Contactez-nous sur WhatsApp
       </a>
     </p>
