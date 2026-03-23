@@ -14,7 +14,8 @@ class User(UserMixin, db.Model):
     mot_de_passe = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='client')
     created_at = db.Column(db.DateTime, default=datetime.now)
-    rendezvous = db.relationship('RendezVous', backref='client', lazy='dynamic')
+    rendezvous = db.relationship(
+        'RendezVous', backref='client', lazy='dynamic')
 
     def set_password(self, password):
         self.mot_de_passe = generate_password_hash(password)
@@ -36,7 +37,8 @@ class Service(db.Model):
     photo = db.Column(db.String(200), nullable=True)
     actif = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
-    rendezvous = db.relationship('RendezVous', backref='service', lazy='dynamic')
+    rendezvous = db.relationship(
+        'RendezVous', backref='service', lazy='dynamic')
 
 
 class Supplement(db.Model):
@@ -52,14 +54,16 @@ class RendezVous(db.Model):
     __tablename__ = 'rendezvous'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey(
+        'services.id'), nullable=False)
     debut_datetime = db.Column(db.DateTime, nullable=False)
     duree_minutes = db.Column(db.Integer, nullable=False)
     statut = db.Column(db.String(20), nullable=False, default='en_attente')
     prix_total = db.Column(db.Float, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.now)
     note_client = db.Column(db.Text, nullable=True)
-    supplements = db.relationship('RDVSupplement', backref='rendezvous', lazy='dynamic')
+    supplements = db.relationship(
+        'RDVSupplement', backref='rendezvous', lazy='dynamic')
 
     @property
     def fin_datetime(self):
@@ -67,16 +71,58 @@ class RendezVous(db.Model):
 
     @property
     def liste_supplements(self):
-        return [rs.supplement for rs in self.supplements]
+        return [rs for rs in self.supplements]
 
 
 class RDVSupplement(db.Model):
     __tablename__ = 'rdv_supplements'
     id = db.Column(db.Integer, primary_key=True)
-    rdv_id = db.Column(db.Integer, db.ForeignKey('rendezvous.id'), nullable=False)
-    supplement_id = db.Column(db.Integer, db.ForeignKey('supplements.id'), nullable=False)
+    rdv_id = db.Column(db.Integer, db.ForeignKey(
+        'rendezvous.id'), nullable=False)
+    supplement_id = db.Column(db.Integer, db.ForeignKey(
+        'supplements.id'), nullable=False)
     prix_snapshot = db.Column(db.Float, nullable=False)
+    nom_snapshot = db.Column(db.String(100), nullable=True)
     supplement = db.relationship('Supplement')
+
+    @property
+    def nom(self):
+        """Pour les templates qui font map(attribute='nom')."""
+        return self.nom_snapshot or (self.supplement.nom if self.supplement else '')
+
+
+class ProfilSalon(db.Model):
+    __tablename__ = 'profil_salon'
+    id = db.Column(db.Integer, primary_key=True)
+    nom_salon = db.Column(db.String(100), nullable=False, default='MonSalon')
+    bio = db.Column(db.Text, nullable=True)
+    whatsapp = db.Column(db.String(20), nullable=True)
+    adresse = db.Column(db.String(200), nullable=True)
+    horaires = db.Column(db.String(200), nullable=True)
+    photo_profil = db.Column(db.String(200), nullable=True)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now, onupdate=datetime.now)
+    photos_interieur = db.relationship(
+        'PhotoSalon', backref='salon', lazy='dynamic')
+
+    @staticmethod
+    def get():
+        profil = ProfilSalon.query.first()
+        if not profil:
+            profil = ProfilSalon()
+            db.session.add(profil)
+            db.session.commit()
+        return profil
+
+
+class PhotoSalon(db.Model):
+    __tablename__ = 'photos_salon'
+    id = db.Column(db.Integer, primary_key=True)
+    salon_id = db.Column(db.Integer, db.ForeignKey(
+        'profil_salon.id'), nullable=False)
+    filename = db.Column(db.String(200), nullable=False)
+    legende = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
 
 def verifier_conflit(debut_nouveau, duree_minutes):
@@ -100,41 +146,3 @@ def get_creneaux_disponibles(date, duree_minutes, heure_ouverture=8, heure_ferme
             creneaux.append(current)
         current += timedelta(minutes=30)
     return creneaux
-
-
-class ProfilSalon(db.Model):
-    """Profil unique du salon — une seule ligne en base."""
-    __tablename__ = 'profil_salon'
-
-    id = db.Column(db.Integer, primary_key=True)
-    nom_salon = db.Column(db.String(100), nullable=False, default='MonSalon')
-    bio = db.Column(db.Text, nullable=True)
-    whatsapp = db.Column(db.String(20), nullable=True)
-    adresse = db.Column(db.String(200), nullable=True)
-    horaires = db.Column(db.String(200), nullable=True)
-    photo_profil = db.Column(db.String(200), nullable=True)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    # Photos intérieur du salon (stockées séparément)
-    photos_interieur = db.relationship('PhotoSalon', backref='salon', lazy='dynamic')
-
-    @staticmethod
-    def get():
-        """Retourne le profil unique, le crée si inexistant."""
-        profil = ProfilSalon.query.first()
-        if not profil:
-            profil = ProfilSalon()
-            db.session.add(profil)
-            db.session.commit()
-        return profil
-
-
-class PhotoSalon(db.Model):
-    """Photos de l'intérieur du salon."""
-    __tablename__ = 'photos_salon'
-
-    id = db.Column(db.Integer, primary_key=True)
-    salon_id = db.Column(db.Integer, db.ForeignKey('profil_salon.id'), nullable=False)
-    filename = db.Column(db.String(200), nullable=False)
-    legende = db.Column(db.String(100), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now)

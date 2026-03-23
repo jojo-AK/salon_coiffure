@@ -51,6 +51,21 @@ def reserver():
             flash('Impossible de reserver dans le passe.', 'danger')
             return render_template('client/reserver.html', services=services, supplements=supplements)
 
+        if debut > datetime.now() + timedelta(days=30):
+            flash('Impossible de reserver a plus de 30 jours.', 'danger')
+            return render_template('client/reserver.html', services=services, supplements=supplements)
+
+        rdv_actif = RendezVous.query.filter(
+            RendezVous.user_id == current_user.id,
+            RendezVous.statut.in_(
+                ['en_attente', 'accepte', 'annulation_demandee'])
+        ).first()
+
+        if rdv_actif:
+            flash(
+                'Vous avez deja un rendez-vous en cours. Annulez-le avant d\'en prendre un nouveau.', 'warning')
+            return render_template('client/reserver.html', services=services, supplements=supplements)
+
         if verifier_conflit(debut, service.duree_minutes):
             flash('Ce creneau est deja pris.', 'warning')
             return render_template('client/reserver.html', services=services, supplements=supplements)
@@ -79,7 +94,8 @@ def reserver():
             rdv_supp = RDVSupplement(
                 rdv_id=rdv.id,
                 supplement_id=supp.id,
-                prix_snapshot=supp.prix
+                prix_snapshot=supp.prix,
+                nom_snapshot=supp.nom
             )
             db.session.add(rdv_supp)
 
@@ -113,6 +129,10 @@ def creneaux_disponibles():
 @client_bp.route('/mes-rendezvous')
 @login_required
 def mes_rendezvous():
+    # Clôture automatique des RDV expirés
+    from app.utils import cloturer_rdv_expires
+    cloturer_rdv_expires()
+
     rdvs = RendezVous.query.filter_by(user_id=current_user.id).order_by(
         RendezVous.debut_datetime.desc()).all()
     return render_template('client/mes_rendezvous.html', rendezvous=rdvs, now=datetime.now())
@@ -127,15 +147,19 @@ def annuler_rdv(rdv_id):
         flash('Action non autorisee.', 'danger')
         return redirect(url_for('client.mes_rendezvous'))
 
-    if rdv.statut == 'annule':
-        flash('Ce RDV est deja annule.', 'warning')
+    if rdv.statut in ['annule', 'annulation_demandee']:
+        flash('Une demande d\'annulation est deja en cours.', 'warning')
         return redirect(url_for('client.mes_rendezvous'))
 
-    if rdv.debut_datetime - datetime.now() < timedelta(hours=2):
-        flash('Annulation impossible moins de 2h avant le rendez-vous.', 'danger')
+    if rdv.statut == 'refuse':
+        flash('Ce RDV est deja refuse.', 'warning')
         return redirect(url_for('client.mes_rendezvous'))
 
-    rdv.statut = 'annule'
+    if rdv.debut_datetime < datetime.now():
+        flash('Impossible d\'annuler un rendez-vous dont la date est passee.', 'danger')
+        return redirect(url_for('client.mes_rendezvous'))
+
+    rdv.statut = 'annulation_demandee'
     db.session.commit()
-    flash('Votre rendez-vous a ete annule. Le creneau est libere.', 'success')
+    flash('Demande d\'annulation envoyee. En attente de confirmation du coiffeur.', 'info')
     return redirect(url_for('client.mes_rendezvous'))

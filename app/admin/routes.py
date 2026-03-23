@@ -29,6 +29,10 @@ def coiffeur_required(f):
 @login_required
 @coiffeur_required
 def dashboard():
+    # Clôture automatique des RDV expirés
+    from app.utils import cloturer_rdv_expires
+    cloturer_rdv_expires()
+
     date_str = request.args.get('date')
     try:
         date_selectionnee = datetime.strptime(
@@ -48,7 +52,8 @@ def dashboard():
 
     rdv_attente = RendezVous.query.filter_by(
         statut='en_attente').order_by(RendezVous.debut_datetime).all()
-
+    rdv_annulations = RendezVous.query.filter_by(
+        statut='annulation_demandee').order_by(RendezVous.debut_datetime).all()
     rdv_acceptes = RendezVous.query.filter(
         RendezVous.statut == 'accepte',
         RendezVous.debut_datetime >= debut_jour,
@@ -58,12 +63,14 @@ def dashboard():
     return render_template('admin/dashboard.html',
                            rdv_du_jour=rdv_du_jour,
                            rdv_attente=rdv_attente,
+                           rdv_annulations=rdv_annulations,
                            rdv_acceptes=rdv_acceptes,
                            aujourd_hui=date_selectionnee.strftime('%d/%m/%Y'),
                            date_precedente=(
                                date_selectionnee - timedelta(days=1)).strftime('%Y-%m-%d'),
                            date_suivante=(date_selectionnee + timedelta(days=1)
                                           ).strftime('%Y-%m-%d'),
+                           now=datetime.now()
                            )
 
 
@@ -216,31 +223,64 @@ def refuser_rdv(rdv_id):
     return redirect(url_for('admin.dashboard'))
 
 
+@admin_bp.route('/rdv/<int:rdv_id>/terminer', methods=['POST'])
+@login_required
+@coiffeur_required
+def terminer_rdv(rdv_id):
+    rdv = RendezVous.query.get_or_404(rdv_id)
+    if rdv.statut != 'accepte':
+        flash('Seul un RDV accepte peut etre marque comme termine.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+    rdv.statut = 'termine'
+    db.session.commit()
+    flash(f'RDV de {rdv.client.nom} marque comme termine.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/rdv/<int:rdv_id>/confirmer-annulation', methods=['POST'])
+@login_required
+@coiffeur_required
+def confirmer_annulation(rdv_id):
+    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv.statut = 'annule'
+    db.session.commit()
+    flash(
+        f'Annulation de {rdv.client.nom} confirmee. Creneau libere.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/rdv/<int:rdv_id>/refuser-annulation', methods=['POST'])
+@login_required
+@coiffeur_required
+def refuser_annulation(rdv_id):
+    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv.statut = 'accepte'
+    db.session.commit()
+    flash(
+        f'Demande d\'annulation de {rdv.client.nom} refusee. RDV maintenu.', 'info')
+    return redirect(url_for('admin.dashboard'))
+
+
 @admin_bp.route('/profil', methods=['GET', 'POST'])
 @login_required
 @coiffeur_required
 def profil():
     from app.models import ProfilSalon, PhotoSalon
     p = ProfilSalon.get()
-
     if request.method == 'POST':
         p.nom_salon = request.form.get('nom_salon', '').strip() or 'MonSalon'
         p.bio = request.form.get('bio', '').strip()
         p.whatsapp = request.form.get('whatsapp', '').strip()
         p.adresse = request.form.get('adresse', '').strip()
         p.horaires = request.form.get('horaires', '').strip()
-
         upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
         os.makedirs(upload_dir, exist_ok=True)
-
         photo = request.files.get('photo_profil')
         if photo and allowed_file(photo.filename):
             filename = secure_filename(f"profil_{photo.filename}")
             photo.save(os.path.join(upload_dir, filename))
             p.photo_profil = filename
-
         db.session.commit()
-
         photos_int = request.files.getlist('photos_interieur')
         for ph in photos_int:
             if ph and allowed_file(ph.filename):
@@ -250,10 +290,8 @@ def profil():
                 ps = PhotoSalon(salon_id=p.id, filename=filename)
                 db.session.add(ps)
         db.session.commit()
-
         flash('Profil mis a jour !', 'success')
         return redirect(url_for('admin.profil'))
-
     photos = PhotoSalon.query.filter_by(salon_id=p.id).all()
     return render_template('admin/profil.html', profil=p, photos=photos)
 
