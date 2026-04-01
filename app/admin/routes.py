@@ -116,7 +116,7 @@ def ajouter_service():
 @login_required
 @coiffeur_required
 def modifier_service(service_id):
-    service = Service.query.get_or_404(service_id)
+    service = db.get_or_404(Service, service_id)
     if request.method == 'POST':
         service.nom = request.form.get('nom', '').strip()
         service.prix = float(request.form.get('prix', 0))
@@ -141,7 +141,7 @@ def modifier_service(service_id):
 @login_required
 @coiffeur_required
 def supprimer_service(service_id):
-    service = Service.query.get_or_404(service_id)
+    service = db.get_or_404(Service, service_id)
     service.actif = False
     db.session.commit()
     flash('Service desactive.', 'info')
@@ -178,7 +178,7 @@ def ajouter_supplement():
 @login_required
 @coiffeur_required
 def modifier_supplement(supp_id):
-    supp = Supplement.query.get_or_404(supp_id)
+    supp = db.get_or_404(Supplement, supp_id)
     if request.method == 'POST':
         supp.nom = request.form.get('nom', '').strip()
         supp.prix = float(request.form.get('prix', 0))
@@ -192,7 +192,7 @@ def modifier_supplement(supp_id):
 @login_required
 @coiffeur_required
 def supprimer_supplement(supp_id):
-    supp = Supplement.query.get_or_404(supp_id)
+    supp = db.get_or_404(Supplement, supp_id)
     supp.actif = False
     db.session.commit()
     flash('Supplement desactive.', 'info')
@@ -203,7 +203,7 @@ def supprimer_supplement(supp_id):
 @login_required
 @coiffeur_required
 def accepter_rdv(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
     rdv.statut = 'accepte'
     db.session.commit()
     notifier_client_confirmation(rdv)
@@ -215,7 +215,7 @@ def accepter_rdv(rdv_id):
 @login_required
 @coiffeur_required
 def refuser_rdv(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
     rdv.statut = 'refuse'
     db.session.commit()
     notifier_client_refus(rdv)
@@ -227,7 +227,7 @@ def refuser_rdv(rdv_id):
 @login_required
 @coiffeur_required
 def terminer_rdv(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
     if rdv.statut != 'accepte':
         flash('Seul un RDV accepte peut etre marque comme termine.', 'warning')
         return redirect(url_for('admin.dashboard'))
@@ -241,7 +241,7 @@ def terminer_rdv(rdv_id):
 @login_required
 @coiffeur_required
 def confirmer_annulation(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
     rdv.statut = 'annule'
     db.session.commit()
     flash(
@@ -253,7 +253,7 @@ def confirmer_annulation(rdv_id):
 @login_required
 @coiffeur_required
 def refuser_annulation(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
     rdv.statut = 'accepte'
     db.session.commit()
     flash(
@@ -301,7 +301,7 @@ def profil():
 @coiffeur_required
 def supprimer_photo_salon(photo_id):
     from app.models import PhotoSalon
-    photo = PhotoSalon.query.get_or_404(photo_id)
+    photo = db.get_or_404(PhotoSalon, photo_id)
     db.session.delete(photo)
     db.session.commit()
     flash('Photo supprimee.', 'info')

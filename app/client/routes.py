@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app.models import db, Service, Supplement, RendezVous, RDVSupplement, verifier_conflit, get_creneaux_disponibles
+from app.notifications import notifier_coiffeur_nouvelle_demande
 
 client_bp = Blueprint('client', __name__)
 
@@ -38,7 +39,7 @@ def reserver():
             flash('Tous les champs sont obligatoires.', 'danger')
             return render_template('client/reserver.html', services=services, supplements=supplements)
 
-        service = Service.query.get_or_404(int(service_id))
+        service = db.get_or_404(Service, int(service_id))
 
         try:
             debut = datetime.strptime(
@@ -100,6 +101,7 @@ def reserver():
             db.session.add(rdv_supp)
 
         db.session.commit()
+        notifier_coiffeur_nouvelle_demande(rdv)
         flash('Demande envoyee ! En attente de confirmation.', 'success')
         return redirect(url_for('client.mes_rendezvous'))
 
@@ -113,7 +115,7 @@ def creneaux_disponibles():
     date_str = request.args.get('date')
     if not service_id or not date_str:
         return jsonify({'error': 'Parametres manquants'}), 400
-    service = Service.query.get_or_404(int(service_id))
+    service = db.get_or_404(Service, int(service_id))
     try:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
@@ -141,7 +143,7 @@ def mes_rendezvous():
 @client_bp.route('/rdv/<int:rdv_id>/annuler', methods=['POST'])
 @login_required
 def annuler_rdv(rdv_id):
-    rdv = RendezVous.query.get_or_404(rdv_id)
+    rdv = db.get_or_404(RendezVous, rdv_id)
 
     if rdv.user_id != current_user.id:
         flash('Action non autorisee.', 'danger')

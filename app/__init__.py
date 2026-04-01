@@ -22,7 +22,7 @@ def create_app(config_name='default'):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     from app.auth.routes import auth_bp
     from app.client.routes import client_bp
