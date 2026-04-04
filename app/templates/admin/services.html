@@ -1,70 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Services – MonSalon{% endblock %}
+{% block title %}Services – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="fw-bold mb-0"><i class="bi bi-scissors text-warning"></i> Gestion des services</h2>
-  <a href="{{ url_for('admin.ajouter_service') }}" class="btn btn-gold">
-    <i class="bi bi-plus-lg"></i> Ajouter
-  </a>
-</div>
+<div class="page-wrapper">
 
-{% if services %}
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>Service</th>
-          <th>Prix</th>
-          <th>Durée</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in services %}
-          <tr>
-            <td>
-              <strong>{{ s.nom }}</strong>
-              {% if s.description %}
-                <br><span class="text-muted small">{{ s.description }}</span>
-              {% endif %}
-            </td>
-            <td>{{ s.prix|int }} FCFA</td>
-            <td><i class="bi bi-clock"></i> {{ s.duree_minutes }} min</td>
-            <td>
-              {% if s.actif %}
-                <span class="badge bg-success">Actif</span>
-              {% else %}
-                <span class="badge bg-secondary">Désactivé</span>
-              {% endif %}
-            </td>
-            <td>
-              <a href="{{ url_for('admin.modifier_service', service_id=s.id) }}"
-                 class="btn btn-sm btn-outline-secondary me-1">
-                <i class="bi bi-pencil"></i>
-              </a>
-              <form method="POST"
-                    action="{{ url_for('admin.supprimer_service', service_id=s.id) }}"
-                    class="d-inline"
-                    onsubmit="return confirm('Désactiver ce service ?')">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                  <i class="bi bi-eye-slash"></i>
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% else %}
-  <div class="text-center py-5">
-    <i class="bi bi-scissors" style="font-size: 3rem; color: #ccc;"></i>
-    <p class="text-muted mt-3">Aucun service créé. Commencez par en ajouter un.</p>
-    <a href="{{ url_for('admin.ajouter_service') }}" class="btn btn-gold mt-2">
-      Ajouter un service
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">
+    <div>
+      <div class="section-tag">Administration</div>
+      <h1 class="page-title" style="margin-bottom:0;">Gestion des <em>services</em></h1>
+    </div>
+    <a href="{{ url_for('admin.ajouter_service') }}" class="btn-primary">
+      + Ajouter un service
     </a>
   </div>
-{% endif %}
+
+  {% if services %}
+  <div class="services-grid" style="margin-bottom:3rem;">
+    {% for s in services %}
+    <div class="service-card" style="{% if not s.actif %}opacity:.5;{% endif %}">
+      <div class="service-photo">
+        {% if s.photo %}
+          <img src="{{ url_for('static', filename='uploads/' + s.photo) }}" alt="{{ s.nom }}">
+        {% else %}✂️{% endif %}
+      </div>
+      <div class="service-body">
+        <div class="service-name">{{ s.nom }}</div>
+        {% if s.description %}<div class="service-desc">{{ s.description }}</div>{% endif %}
+        <div class="service-footer">
+          <span class="price-badge">{{ s.prix|int }} FCFA</span>
+          <span style="font-size:.78rem; color:var(--text-muted);">⏱ {{ s.duree_minutes }} min</span>
+        </div>
+        <div style="display:flex; gap:.6rem; margin-top:1rem;">
+          <a href="{{ url_for('admin.modifier_service', service_id=s.id) }}"
+             class="btn-secondary" style="flex:1; text-align:center; font-size:.8rem; padding:.5rem;">
+            ✏ Modifier
+          </a>
+          <form method="POST" action="{{ url_for('admin.supprimer_service', service_id=s.id) }}"
+                style="flex:1;" onsubmit="return confirm('Désactiver ce service ?')">
+            <button type="submit" class="btn-secondary"
+                    style="width:100%; font-size:.8rem; padding:.5rem; border-color:rgba(239,68,68,.3); color:#f87171;">
+              {% if s.actif %}Désactiver{% else %}✓ Actif{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center; padding:5rem 0;">
+    <div style="font-size:3rem; opacity:.2; margin-bottom:1rem;">✂️</div>
+    <p style="color:var(--text-muted); margin-bottom:1.5rem;">Aucun service créé. Commencez par en ajouter un.</p>
+    <a href="{{ url_for('admin.ajouter_service') }}" class="btn-primary">Ajouter un service</a>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

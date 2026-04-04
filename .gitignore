@@ -1,8 +1,35 @@
-@"
+# Environnement Python
 .env
-*.db
+.venv/
+venv/
+env/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# Base de données locale
+*.db
+*.sqlite3
+
+# Tests & cache
 .pytest_cache/
+.coverage
+htmlcov/
+
+# Flask / instance folder
 instance/
-"@ | Set-Content .gitignore
+
+# Uploads (données utilisateur, ne pas versionner)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

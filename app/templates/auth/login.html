@@ -1,39 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Connexion – MonSalon{% endblock %}
+{% block title %}Connexion – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mx-0">
-  <div class="col-12 col-sm-10 col-md-6 col-lg-5">
-    <div class="card border-0 shadow-sm mt-4">
-      <div class="card-body p-4">
-        <h3 class="fw-bold mb-1 text-center">Connexion</h3>
-        <p class="text-muted text-center small mb-4">Accédez à votre espace client</p>
+<div class="auth-card">
+  <h2>Connexion</h2>
+  <p class="auth-sub">Accédez à votre espace client</p>
 
-        <form method="POST">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Email</label>
-            <input type="email" name="email" class="form-control" placeholder="votre@email.com" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Mot de passe</label>
-            <input type="password" name="password" class="form-control" placeholder="••••••••" required />
-          </div>
-          <div class="mb-3 form-check">
-            <input type="checkbox" name="remember" class="form-check-input" id="remember" />
-            <label class="form-check-label text-muted small" for="remember">Se souvenir de moi</label>
-          </div>
-          <button type="submit" class="btn btn-gold w-100 py-2">
-            <i class="bi bi-box-arrow-in-right"></i> Se connecter
-          </button>
-        </form>
-
-        <hr class="my-3" />
-        <p class="text-center text-muted small mb-0">
-          Pas encore de compte ?
-          <a href="{{ url_for('auth.register') }}" class="text-warning fw-semibold">S'inscrire</a>
-        </p>
-      </div>
+  <form method="POST">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" name="email" placeholder="votre@email.com" required />
     </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" name="password" placeholder="••••••••" required />
+    </div>
+    <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:1.5rem;">
+      <input type="checkbox" name="remember" id="remember" style="width:16px; height:16px; accent-color:var(--accent); cursor:pointer;">
+      <label for="remember" style="font-size:.85rem; color:var(--text-muted); cursor:pointer;">Se souvenir de moi</label>
+    </div>
+    <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:1rem;">
+      Se connecter
+    </button>
+  </form>
+
+  <div style="text-align:center; margin-top:1.5rem; font-size:.88rem; color:var(--text-muted);">
+    Pas encore de compte ?
+    <a href="{{ url_for('auth.register') }}" style="color:var(--accent); font-weight:600;">S'inscrire</a>
   </div>
 </div>
 {% endblock %}

@@ -1,42 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Suppléments – MonSalon{% endblock %}
+{% block title %}Suppléments – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="fw-bold mb-0"><i class="bi bi-plus-circle text-warning"></i> Suppléments</h2>
-  <a href="{{ url_for('admin.ajouter_supplement') }}" class="btn btn-gold">
-    <i class="bi bi-plus-lg"></i> Ajouter
-  </a>
+<div class="page-wrapper">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">
+    <div>
+      <div class="section-tag">Administration</div>
+      <h1 class="page-title" style="margin-bottom:0;">Gestion des <em>suppléments</em></h1>
+    </div>
+    <a href="{{ url_for('admin.ajouter_supplement') }}" class="btn-primary">
+      + Ajouter un supplément
+    </a>
+  </div>
+
+  {% if supplements %}
+  <div class="card" style="padding:0; overflow:hidden; margin-bottom:3rem;">
+    {% for s in supplements %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:1.2rem 1.5rem; border-bottom:1px solid var(--border); {% if loop.last %}border-bottom:none;{% endif %} {% if not s.actif %}opacity:.5;{% endif %}">
+      <div>
+        <div style="font-weight:600; font-size:.95rem; margin-bottom:.2rem;">{{ s.nom }}</div>
+        <div style="color:var(--accent); font-size:.88rem; font-weight:600;">{{ s.prix|int }} FCFA</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:.8rem;">
+        {% if s.actif %}
+          <span style="font-size:.75rem; background:rgba(74,222,128,.1); color:#4ade80; padding:.2rem .7rem; border-radius:50px; border:1px solid rgba(74,222,128,.2);">Actif</span>
+        {% else %}
+          <span style="font-size:.75rem; background:rgba(255,255,255,.05); color:var(--text-muted); padding:.2rem .7rem; border-radius:50px; border:1px solid var(--border);">Désactivé</span>
+        {% endif %}
+        <a href="{{ url_for('admin.modifier_supplement', supp_id=s.id) }}"
+           class="btn-secondary" style="font-size:.8rem; padding:.4rem .9rem;">✏</a>
+        <form method="POST" action="{{ url_for('admin.supprimer_supplement', supp_id=s.id) }}"
+              onsubmit="return confirm('Désactiver ce supplément ?')">
+          <button type="submit" class="btn-secondary"
+                  style="font-size:.8rem; padding:.4rem .9rem; border-color:rgba(239,68,68,.3); color:#f87171;">✕</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center; padding:5rem 0;">
+    <div style="font-size:3rem; opacity:.2; margin-bottom:1rem;">➕</div>
+    <p style="color:var(--text-muted); margin-bottom:1.5rem;">Aucun supplément créé.</p>
+    <a href="{{ url_for('admin.ajouter_supplement') }}" class="btn-primary">Ajouter un supplément</a>
+  </div>
+  {% endif %}
+
 </div>
-{% if supplements %}
-<div class="table-responsive">
-  <table class="table table-hover align-middle">
-    <thead class="table-dark">
-      <tr><th>Nom</th><th>Prix</th><th>Statut</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      {% for s in supplements %}
-      <tr>
-        <td><strong>{{ s.nom }}</strong></td>
-        <td>{{ s.prix|int }} FCFA</td>
-        <td>{% if s.actif %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-secondary">Désactivé</span>{% endif %}</td>
-        <td>
-          <a href="{{ url_for('admin.modifier_supplement', supp_id=s.id) }}" class="btn btn-sm btn-outline-secondary me-1">
-            <i class="bi bi-pencil"></i>
-          </a>
-          <form method="POST" action="{{ url_for('admin.supprimer_supplement', supp_id=s.id) }}" class="d-inline" onsubmit="return confirm('Désactiver ?')">
-            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-eye-slash"></i></button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<div class="text-center py-5">
-  <i class="bi bi-plus-circle" style="font-size:3rem;color:#ccc;"></i>
-  <p class="text-muted mt-3">Aucun supplément. Ajoutez-en un.</p>
-  <a href="{{ url_for('admin.ajouter_supplement') }}" class="btn btn-gold mt-2">Ajouter un supplément</a>
-</div>
-{% endif %}
 {% endblock %}

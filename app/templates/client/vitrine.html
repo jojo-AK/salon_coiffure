@@ -1,149 +1,89 @@
 {% extends "base.html" %}
-{% block title %}MonSalon – Accueil{% endblock %}
+{% block title %}{{ profil_salon.nom_salon if profil_salon else 'MonSalon' }} – Accueil{% endblock %}
 
 {% block content %}
+<div class="page-wrapper">
 
-<!-- HERO compact -->
-<div class="text-center py-3 py-md-4 mb-4 mb-md-5 rounded-4 px-2"
-  style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
-  <i class="bi bi-scissors" style="font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--salon-gold);"></i>
-  <h1 class="mt-2 fw-bold fs-4 fs-md-3">Bienvenue chez {{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}</h1>
-  <p class="text-secondary mb-3 small">Choisissez votre coupe et réservez en quelques clics</p>
-  <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank" class="btn btn-success btn-sm px-3">
-    <i class="bi bi-whatsapp"></i> Nous contacter
-  </a>
-</div>
-
-<!-- TITRE SECTION -->
-<h2 class="fw-bold mb-3 mb-md-4 text-center fs-5 fs-md-4">
-  <i class="bi bi-scissors text-warning"></i> Nos services
-</h2>
-
-{% if services %}
-<div class="row g-3 g-md-4">
-  {% for service in services %}
-  <div class="col-12 col-sm-6 col-lg-4">
-    <div class="card h-100 border-0 shadow-sm service-card-vitrine">
-
-      <!-- Photo ou placeholder -->
-      {% if service.photo %}
-      <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top img-fluid"
-        style="height: 180px; min-height: 160px; object-fit: cover;" alt="{{ service.nom }}">
-      {% else %}
-      <div class="d-flex align-items-center justify-content-center"
-        style="height: 200px; background: linear-gradient(135deg, #2a2a2a, #3a3a3a);">
-        <i class="bi bi-scissors" style="font-size: 3.5rem; color: var(--salon-gold);"></i>
-      </div>
+  <!-- HERO -->
+  <div class="hero-section reveal">
+    <div class="section-tag">✦ Salon de Coiffure</div>
+    <h1 class="page-title">Bienvenue chez <em>{{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}</em></h1>
+    <p class="page-subtitle" style="max-width:540px;">Choisissez votre coupe et réservez en quelques clics. Qualité, style et authenticité.</p>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3rem;">
+      {% if current_user.is_authenticated and not current_user.is_admin() %}
+        <a href="{{ url_for('client.reserver') }}" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Prendre rendez-vous
+        </a>
+      {% elif not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn-primary">Réserver maintenant</a>
       {% endif %}
+      <a href="{{ url_for('client.profil_salon') }}" class="btn-secondary">Notre salon →</a>
+    </div>
+  </div>
 
-      <div class="card-body d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <h5 class="card-title fw-bold mb-0">{{ service.nom }}</h5>
-          <span class="badge bg-warning text-dark fs-6 ms-2">{{ service.prix|int }} FCFA</span>
-        </div>
+  <!-- SERVICES -->
+  <div class="section-header reveal" style="text-align:left; margin:0 0 2rem;">
+    <div class="section-tag">Ce qu'on fait</div>
+    <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.6rem,3vw,2.2rem); font-weight:700;">Nos Services</h2>
+  </div>
 
-        {% if service.description %}
-        <p class="card-text text-muted small flex-fill">{{ service.description }}</p>
+  {% if services %}
+  <div class="services-grid">
+    {% for service in services %}
+    <div class="service-card reveal stagger-{{ loop.index if loop.index <= 5 else '' }}">
+      <div class="service-photo">
+        {% if service.photo %}
+          <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" alt="{{ service.nom }}">
+        {% else %}
+          ✂️
         {% endif %}
-
-        <div class="d-flex align-items-center justify-content-between mt-3">
-          <span class="text-muted small">
-            <i class="bi bi-clock me-1"></i>{{ service.duree_minutes }} min
-          </span>
-
+      </div>
+      <div class="service-body">
+        <div class="service-name">{{ service.nom }}</div>
+        {% if service.description %}
+        <div class="service-desc">{{ service.description }}</div>
+        {% endif %}
+        <div class="service-footer">
+          <span class="price-badge">{{ service.prix|int }} FCFA</span>
+          <span style="font-size:.8rem; color:var(--text-muted);">⏱ {{ service.duree_minutes }} min</span>
           {% if current_user.is_authenticated and not current_user.is_admin() %}
-          <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}" class="btn btn-gold btn-sm px-3">
-            <i class="bi bi-calendar-plus"></i> Réserver
-          </a>
+            <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}" class="btn-primary" style="padding:.5rem 1rem; font-size:.82rem;">Réserver</a>
           {% elif not current_user.is_authenticated %}
-          <a href="{{ url_for('auth.register') }}" class="btn btn-outline-warning btn-sm px-3">
-            <i class="bi bi-calendar-plus"></i> Réserver
-          </a>
+            <a href="{{ url_for('auth.register') }}" class="btn-secondary" style="padding:.5rem 1rem; font-size:.82rem;">Réserver</a>
           {% endif %}
         </div>
       </div>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
+  {% else %}
+  <div style="text-align:center; padding:4rem 0; color:var(--text-muted);">
+    <div style="font-size:3rem; margin-bottom:1rem; opacity:.3;">✂️</div>
+    <p>Aucun service disponible pour le moment.</p>
+  </div>
+  {% endif %}
+
+  <!-- INFO CARDS -->
+  <div class="info-grid">
+    <div class="card info-card reveal stagger-1">
+      <div class="info-icon">🕐</div>
+      <h4>Horaires</h4>
+      <p>{{ profil_salon.horaires if profil_salon and profil_salon.horaires else 'Lun – Sam : 8h – 20h' }}</p>
+    </div>
+    <div class="card info-card reveal stagger-2">
+      <div class="info-icon">📍</div>
+      <h4>Adresse</h4>
+      <p>{{ profil_salon.adresse if profil_salon and profil_salon.adresse else 'Lomé, Togo' }}</p>
+    </div>
+    <div class="card info-card reveal stagger-3">
+      <div class="info-icon">💬</div>
+      <h4>Contact rapide</h4>
+      <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank">
+        {{ profil_salon.whatsapp if profil_salon and profil_salon.whatsapp else '+228 90 00 00 00' }}
+      </a>
+    </div>
+  </div>
+
 </div>
-
-{% else %}
-<div class="text-center py-5">
-  <i class="bi bi-scissors" style="font-size: 3rem; color: #ccc;"></i>
-  <p class="text-muted mt-3">Aucun service disponible pour le moment.</p>
-</div>
-{% endif %}
-
-<!-- INFOS BAS DE PAGE -->
-<div class="row g-4 mt-4 mt-md-5 pt-3 border-top">
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-clock-history text-warning" style="font-size: 1.75rem;"></i>
-    <h6 class="mt-2 fw-semibold">Horaires</h6>
-    <p class="text-muted small mb-0">{{ profil_salon.horaires or 'Lun – Sam : 8h – 20h' }}</p>
-  </div>
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-geo-alt text-warning" style="font-size: 1.75rem;"></i>
-    <h6 class="mt-2 fw-semibold">Adresse</h6>
-    <p class="text-muted small mb-0">{{ profil_salon.adresse or 'Lomé, Togo' }}</p>
-  </div>
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-whatsapp text-success" style="font-size: 1.75rem;"></i>
-    <h6 class="mt-2 fw-semibold">Contact rapide</h6>
-    <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" class="text-success small text-break" target="_blank">{{ profil_salon.whatsapp or '+228 90 00 00 00' }}</a>
-  </div>
-</div>
-
-{% endblock %}
-
-{% block extra_css %}
-<style>
-  .service-card-vitrine {
-    cursor: pointer;
-    transition: transform .2s, box-shadow .2s;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .service-card-vitrine:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .12) !important;
-  }
-</style>
-{% endblock %}
-
-<!-- Bouton WhatsApp flottant -->
-{% block extra_js %}
-<style>
-  .whatsapp-float {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    z-index: 998;
-    width: 48px;
-    height: 48px;
-    background: #25d366;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
-    transition: transform .2s;
-  }
-  @media (min-width: 576px) {
-    .whatsapp-float { bottom: 24px; right: 24px; width: 52px; height: 52px; }
-  }
-  .whatsapp-float:hover {
-    transform: scale(1.1);
-  }
-  .whatsapp-float i {
-    font-size: 1.4rem;
-    color: white;
-  }
-  @media (min-width: 576px) {
-    .whatsapp-float i { font-size: 1.6rem; }
-  }
-</style>
-<a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank" class="whatsapp-float" title="Nous contacter sur WhatsApp">
-  <i class="bi bi-whatsapp"></i>
-</a>
 {% endblock %}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>À propos — Shegey Cut</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ——— STORY ——— */
+  .story-section {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; max-width: 1100px; margin: 0 auto;
+    align-items: center;
+  }
+  .story-img {
+    aspect-ratio: 4/5; border-radius: var(--radius);
+    background: var(--bg-card); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .story-img::before {
+    content: '💈';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem; opacity: .15;
+  }
+  .story-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; margin-bottom: 1.2rem;
+  }
+  .story-content h3 em { color: var(--accent); font-style: italic; }
+  .story-content p {
+    color: var(--text-muted); font-size: .95rem;
+    line-height: 1.8; margin-bottom: 1rem;
+  }
+
+  /* ——— VALUES ——— */
+  .values-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem; max-width: 1100px; margin: 0 auto;
+  }
+  .value-card .v-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(201,169,110,.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 1.4rem;
+    border: 1px solid rgba(201,169,110,.15);
+  }
+  .value-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; margin-bottom: .6rem;
+  }
+  .value-card p {
+    color: var(--text-muted); font-size: .88rem; line-height: 1.65;
+  }
+
+  /* ——— FOUNDER PROFILE ——— */
+  .founder-profile {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: 300px 1fr;
+    gap: 3rem; align-items: center;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem;
+    position: relative; overflow: hidden;
+  }
+  .founder-profile::before {
+    content: '';
+    position: absolute; top: -1px; left: 20%; right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .fp-avatar {
+    width: 100%; aspect-ratio: 1;
+    border-radius: 14px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .fp-avatar::before {
+    content: '👤';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; opacity: .2;
+  }
+  .fp-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; margin-bottom: .3rem;
+  }
+  .fp-role {
+    color: var(--accent); font-size: .82rem;
+    font-weight: 600; text-transform: uppercase;
+    letter-spacing: .12em; margin-bottom: 1.2rem;
+  }
+  .fp-info p {
+    color: var(--text-muted); font-size: .95rem;
+    line-height: 1.7; margin-bottom: 1rem;
+  }
+  .fp-stats {
+    display: flex; gap: 2rem; margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .fp-stat-item {}
+  .fp-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--accent);
+  }
+  .fp-stat-label {
+    font-size: .72rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+
+  /* ——— TIMELINE ——— */
+  .timeline {
+    max-width: 700px; margin: 0 auto;
+    position: relative;
+    padding-left: 3rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--border));
+  }
+  .tl-item {
+    position: relative;
+    padding-bottom: 2.5rem;
+  }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-dot {
+    position: absolute; left: -3rem; top: .2rem;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--accent);
+    z-index: 2;
+  }
+  .tl-year {
+    font-size: .72rem; font-weight: 600;
+    color: var(--accent); text-transform: uppercase;
+    letter-spacing: .12em; margin-bottom: .3rem;
+  }
+  .tl-item h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; margin-bottom: .4rem;
+  }
+  .tl-item p {
+    color: var(--text-muted); font-size: .88rem; line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .story-section { grid-template-columns: 1fr; }
+    .values-grid { grid-template-columns: 1fr; }
+    .founder-profile {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+    .fp-avatar { max-width: 200px; margin: 0 auto; }
+    .fp-stats { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">Shegey <span>Cut</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="a-propos.html" class="active">À propos</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="tarifs.html">Tarifs</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="contact.html" class="nav-cta">Réserver</a>
+  <button class="hamburger" onclick="openMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div id="mobileMenu" class="mobile-menu">
+  <button class="mobile-close" onclick="closeMenu()">✕</button>
+  <a href="index.html" onclick="closeMenu()">Accueil</a>
+  <a href="a-propos.html" onclick="closeMenu()">À propos</a>
+  <a href="services.html" onclick="closeMenu()">Services</a>
+  <a href="tarifs.html" onclick="closeMenu()">Tarifs</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="section-tag">Notre histoire</div>
+  <h1>À propos de <em>Shegey Cut</em></h1>
+  <p>Plus qu'un salon, un lieu où le style rencontre l'authenticité. Découvrez l'histoire derrière chaque coup de ciseaux.</p>
+</div>
+
+<!-- STORY -->
+<section>
+  <div class="story-section">
+    <div class="story-img reveal"></div>
+    <div class="story-content reveal">
+      <h3>Né de la <em>passion</em>,<br>forgé par le <em>style</em></h3>
+      <p>Shegey Cut est né d'une vision simple mais ambitieuse : offrir à Lomé un espace de coiffure qui allie technique moderne, créativité et authenticité.</p>
+      <p>Le mot « Shegey » incarne l'esprit débrouillard, la détermination et le style de ceux qui se construisent par eux-mêmes. Ici, chaque coupe raconte une histoire.</p>
+      <p>Depuis l'ouverture, le salon s'est imposé comme une adresse incontournable pour ceux qui recherchent bien plus qu'une simple coupe de cheveux.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section style="background: var(--bg-card);">
+  <div class="section-header reveal">
+    <div class="section-tag">Nos valeurs</div>
+    <h2>Ce qui nous définit</h2>
+    <p>Trois piliers guident chaque geste, chaque coupe, chaque interaction chez Shegey Cut.</p>
+  </div>
+  <div class="values-grid">
+    <div class="card value-card reveal stagger-1">
+      <div class="v-icon">✨</div>
+      <h3>Excellence</h3>
+      <p>Chaque détail compte. De la précision du dégradé au confort de l'accueil, nous visons la perfection dans tout ce que nous faisons.</p>
+    </div>
+    <div class="card value-card reveal stagger-2">
+      <div class="v-icon">🤝</div>
+      <h3>Authenticité</h3>
+      <p>Votre style est unique, et nous le respectons. Nous écoutons, conseillons et créons un look qui vous ressemble vraiment.</p>
+    </div>
+    <div class="card value-card reveal stagger-3">
+      <div class="v-icon">🔥</div>
+      <h3>Passion</h3>
+      <p>La coiffure n'est pas un métier pour nous, c'est un art. Cette flamme se ressent dans chaque coupe que nous réalisons.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section>
+  <div class="section-header reveal">
+    <div class="section-tag">Le chef</div>
+    <h2>Le visage derrière Shegey Cut</h2>
+  </div>
+  <div class="founder-profile reveal">
+    <div class="fp-avatar"></div>
+    <div class="fp-info">
+      <h3>Le Fondateur</h3>
+      <div class="fp-role">Fondateur & Master Barber</div>
+      <p>Passionné de coiffure depuis son plus jeune âge, il a perfectionné son art au fil des années avant de lancer Shegey Cut. Sa vision : combiner les techniques classiques du barbier avec les tendances modernes pour créer des styles uniques.</p>
+      <p>Il est à la fois le créateur, le coiffeur et l'âme du salon. Chaque client qui s'assied dans son fauteuil repart avec un look qui lui correspond parfaitement.</p>
+      <div class="fp-stats">
+        <div class="fp-stat-item">
+          <div class="fp-stat-num">5+</div>
+          <div class="fp-stat-label">Ans d'exp.</div>
+        </div>
+        <div class="fp-stat-item">
+          <div class="fp-stat-num">3000+</div>
+          <div class="fp-stat-label">Clients</div>
+        </div>
+        <div class="fp-stat-item">
+          <div class="fp-stat-num">15+</div>
+          <div class="fp-stat-label">Styles</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section style="background: var(--bg-card);">
+  <div class="section-header reveal">
+    <div class="section-tag">Parcours</div>
+    <h2>Notre histoire</h2>
+  </div>
+  <div class="timeline">
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-year">Le début</div>
+      <h4>La passion naît</h4>
+      <p>Les premières coupes entre amis, les premiers dégradés. Le talent se révèle et l'envie de se professionnaliser grandit.</p>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-year">Formation</div>
+      <h4>Apprentissage & perfectionnement</h4>
+      <p>Des heures de pratique, d'apprentissage des techniques modernes et de maîtrise des outils professionnels.</p>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-year">Lancement</div>
+      <h4>Shegey Cut ouvre ses portes</h4>
+      <p>Le rêve devient réalité. Le salon ouvre à Lomé avec une vision claire : offrir de la qualité accessible à tous.</p>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-year">Aujourd'hui</div>
+      <h4>Une référence à Lomé</h4>
+      <p>Plus de 3000 clients satisfaits, une communauté fidèle et un seul objectif : continuer à grandir et à vous sublimer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand-section">
+      <div class="logo">Shegey <span>Cut</span></div>
+      <p>L'art de la coupe parfaite. Votre salon de coiffure moderne à Lomé, Togo.</p>
+      <div class="footer-socials">
+        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="a-propos.html">À propos</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="tarifs.html">Tarifs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="services.html">Coupe classique</a></li>
+        <li><a href="services.html">Coupe + Barbe</a></li>
+        <li><a href="services.html">Coloration</a></li>
+        <li><a href="services.html">Design & Motifs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <div class="footer-info-item">📍 Lomé, Togo</div>
+      <div class="footer-info-item">📞 +228 90 00 00 00</div>
+      <div class="footer-info-item">✉️ contact@shegeycut.com</div>
+      <div class="footer-info-item">🕐 Lun – Sam : 8h – 20h</div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Shegey Cut. Tous droits réservés.</div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/22890000000" target="_blank" class="whatsapp-float" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" aria-label="Retour en haut">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="js/main.js"></script>
+</body>
+</html>

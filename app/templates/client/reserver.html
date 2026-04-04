@@ -1,186 +1,128 @@
 {% extends "base.html" %}
-{% block title %}Réserver – MonSalon{% endblock %}
+{% block title %}Réserver – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mx-0">
-  <div class="col-12 col-lg-8">
-    <h2 class="fw-bold mb-1"><i class="bi bi-calendar-plus text-warning"></i> Réserver un rendez-vous</h2>
-    <p class="text-muted mb-4">Suivez les étapes ci-dessous pour finaliser votre réservation.</p>
+<div class="page-wrapper" style="max-width:820px;">
 
-    <!-- Barre de progression -->
-    <div class="d-flex align-items-center mb-4 gap-1 gap-md-2 overflow-x-auto pb-2" id="progressBar" style="min-width: 0;">
-      <div class="step-pill active flex-shrink-0" id="pill1">1 · Service</div>
-      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
-      <div class="step-pill flex-shrink-0" id="pill2"><span class="d-none d-sm-inline">2 · </span>Suppléments</div>
-      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
-      <div class="step-pill flex-shrink-0" id="pill3"><span class="d-none d-sm-inline">3 · </span>Créneau</div>
-      <div class="flex-fill" style="min-width:8px; height:2px;background:#dee2e6;"></div>
-      <div class="step-pill flex-shrink-0" id="pill4"><span class="d-none d-sm-inline">4 · </span>Confirmation</div>
-    </div>
+  <h1 class="page-title">Réserver un <em>rendez-vous</em></h1>
+  <p class="page-subtitle">Suivez les étapes pour finaliser votre réservation.</p>
 
-    <form method="POST" id="formRDV">
-      <input type="hidden" name="service_id" id="hidServiceId" required/>
-      <input type="hidden" name="date" id="hidDate" required/>
-      <input type="hidden" name="heure" id="hidHeure" required/>
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step-pill active" id="pill1">1 · Service</div>
+    <div class="step-sep"></div>
+    <div class="step-pill" id="pill2">2 · Suppléments</div>
+    <div class="step-sep"></div>
+    <div class="step-pill" id="pill3">3 · Créneau</div>
+    <div class="step-sep"></div>
+    <div class="step-pill" id="pill4">4 · Confirmation</div>
+  </div>
 
-      <!-- ÉTAPE 1 : Service -->
-      <div class="step-block" id="step1">
-        <h5 class="fw-semibold mb-3">Choisissez un service</h5>
-        <div class="row g-3">
-          {% for service in services %}
-          <div class="col-sm-6">
-            <div class="card service-card h-100 border-0 shadow-sm" data-id="{{ service.id }}" data-prix="{{ service.prix }}" data-duree="{{ service.duree_minutes }}" data-nom="{{ service.nom }}">
-              {% if service.photo %}
-                <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" class="card-img-top" style="height:140px;object-fit:cover;" alt="{{ service.nom }}">
-              {% else %}
-                <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10" style="height:140px;">
-                  <i class="bi bi-scissors" style="font-size:3rem;color:#ccc;"></i>
-                </div>
-              {% endif %}
-              <div class="card-body">
-                <h6 class="fw-bold mb-1">{{ service.nom }}</h6>
-                <p class="text-muted small mb-2">{{ service.description or '' }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="badge bg-warning text-dark">{{ service.prix|int }} FCFA</span>
-                  <span class="text-muted small"><i class="bi bi-clock"></i> {{ service.duree_minutes }} min</span>
-                </div>
-              </div>
+  <form method="POST" id="formRDV">
+    <input type="hidden" name="service_id" id="hidServiceId" required/>
+    <input type="hidden" name="date"       id="hidDate"      required/>
+    <input type="hidden" name="heure"      id="hidHeure"     required/>
+
+    <!-- ÉTAPE 1 -->
+    <div class="step-block" id="step1">
+      <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:.92rem;">Choisissez le service qui vous convient.</p>
+      <div class="services-grid" style="grid-template-columns:repeat(auto-fill, minmax(240px,1fr));">
+        {% for service in services %}
+        <div class="service-card" data-id="{{ service.id }}" data-prix="{{ service.prix }}" data-duree="{{ service.duree_minutes }}" data-nom="{{ service.nom }}">
+          <div class="service-photo">
+            {% if service.photo %}
+              <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" alt="{{ service.nom }}">
+            {% else %}✂️{% endif %}
+          </div>
+          <div class="service-body">
+            <div class="service-name">{{ service.nom }}</div>
+            {% if service.description %}<div class="service-desc">{{ service.description }}</div>{% endif %}
+            <div class="service-footer">
+              <span class="price-badge">{{ service.prix|int }} FCFA</span>
+              <span style="font-size:.78rem; color:var(--text-muted);">⏱ {{ service.duree_minutes }} min</span>
             </div>
           </div>
-          {% endfor %}
         </div>
-        <button type="button" class="btn btn-gold mt-4 px-4" id="btnStep1" disabled onclick="goStep(2)">
-          Suivant <i class="bi bi-arrow-right"></i>
+        {% endfor %}
+      </div>
+      <div style="margin-top:2rem;">
+        <button type="button" class="btn-primary" id="btnStep1" disabled onclick="goStep(2)">
+          Suivant →
         </button>
       </div>
+    </div>
 
-      <!-- ÉTAPE 2 : Suppléments -->
-      <div class="step-block d-none" id="step2">
-        <h5 class="fw-semibold mb-1">Suppléments (optionnel)</h5>
-        <p class="text-muted small mb-3">Ajoutez des options à votre service. Le prix se met à jour automatiquement.</p>
-        <div class="row g-3">
-          {% for supp in supplements %}
-          <div class="col-sm-6">
-            <label class="supp-card d-flex align-items-center gap-3 p-3 border rounded-3 cursor-pointer w-100">
-              <input type="checkbox" name="supplements" value="{{ supp.id }}" class="supp-check form-check-input mt-0" data-prix="{{ supp.prix }}" data-nom="{{ supp.nom }}" style="width:20px;height:20px;">
-              <div class="flex-fill">
-                <div class="fw-semibold">{{ supp.nom }}</div>
-                <div class="text-muted small">+ {{ supp.prix|int }} FCFA</div>
-              </div>
-            </label>
+    <!-- ÉTAPE 2 -->
+    <div class="step-block" id="step2" style="display:none;">
+      <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:.92rem;">Ajoutez des options à votre service (optionnel).</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:1rem;">
+        {% for supp in supplements %}
+        <label class="supp-card">
+          <input type="checkbox" name="supplements" value="{{ supp.id }}" class="supp-check" data-prix="{{ supp.prix }}" data-nom="{{ supp.nom }}">
+          <div>
+            <div style="font-weight:600; font-size:.92rem;">{{ supp.nom }}</div>
+            <div style="color:var(--accent); font-size:.84rem;">+ {{ supp.prix|int }} FCFA</div>
           </div>
-          {% endfor %}
-        </div>
-
-        <!-- Récap prix -->
-        <div class="card border-0 bg-light mt-4 p-3 rounded-3" id="recapPrix">
-          <div class="d-flex justify-content-between small text-muted mb-1">
-            <span>Service</span><span id="recapService">—</span>
-          </div>
-          <div id="recapSuppsContainer"></div>
-          <hr class="my-2">
-          <div class="d-flex justify-content-between fw-bold">
-            <span>Total</span><span id="recapTotal" class="text-warning">—</span>
-          </div>
-        </div>
-
-        <div class="d-flex gap-2 mt-4">
-          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(1)">
-            <i class="bi bi-arrow-left"></i> Retour
-          </button>
-          <button type="button" class="btn btn-gold px-4" onclick="goStep(3)">
-            Suivant <i class="bi bi-arrow-right"></i>
-          </button>
-        </div>
+        </label>
+        {% endfor %}
       </div>
 
-      <!-- ÉTAPE 3 : Créneau -->
-      <div class="step-block d-none" id="step3">
-        <h5 class="fw-semibold mb-3">Choisissez une date et un créneau</h5>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Date</label>
-          <input type="date" id="dateInput" class="form-control" style="max-width:100%;" required/>
-        </div>
-        <div id="creneauxContainer">
-          <p class="text-muted small">Sélectionnez une date pour voir les créneaux disponibles.</p>
-        </div>
-
-        <div class="d-flex gap-2 mt-4">
-          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(2)">
-            <i class="bi bi-arrow-left"></i> Retour
-          </button>
-          <button type="button" class="btn btn-gold px-4" id="btnStep3" disabled onclick="goStep(4)">
-            Suivant <i class="bi bi-arrow-right"></i>
-          </button>
-        </div>
+      <div class="recap-card" id="recapPrix">
+        <div class="recap-row"><span>Service</span><span id="recapService">—</span></div>
+        <div id="recapSuppsContainer"></div>
+        <div class="recap-total"><span>Total</span><span id="recapTotal">—</span></div>
       </div>
 
-      <!-- ÉTAPE 4 : Confirmation -->
-      <div class="step-block d-none" id="step4">
-        <h5 class="fw-semibold mb-3">Confirmez votre réservation</h5>
-        <div class="card border-0 shadow-sm p-4 mb-4">
-          <div class="row g-2">
-            <div class="col-6 text-muted small">Service</div>
-            <div class="col-6 fw-semibold" id="confService">—</div>
-            <div class="col-6 text-muted small">Suppléments</div>
-            <div class="col-6 fw-semibold" id="confSupps">Aucun</div>
-            <div class="col-6 text-muted small">Date</div>
-            <div class="col-6 fw-semibold" id="confDate">—</div>
-            <div class="col-6 text-muted small">Heure</div>
-            <div class="col-6 fw-semibold" id="confHeure">—</div>
-            <div class="col-6 text-muted small">Durée</div>
-            <div class="col-6 fw-semibold" id="confDuree">—</div>
-            <hr class="my-2">
-            <div class="col-6 fw-bold">Total</div>
-            <div class="col-6 fw-bold text-warning fs-5" id="confTotal">—</div>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Note pour le coiffeur (optionnel)</label>
-          <textarea name="note" class="form-control" rows="2" placeholder="Ex: je voudrais aussi une barbe..."></textarea>
-        </div>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(3)">
-            <i class="bi bi-arrow-left"></i> Retour
-          </button>
-          <button type="submit" class="btn btn-gold px-5 py-2">
-            <i class="bi bi-send"></i> Envoyer la demande
-          </button>
+      <div style="display:flex; gap:1rem; margin-top:2rem;">
+        <button type="button" class="btn-secondary" onclick="goStep(1)">← Retour</button>
+        <button type="button" class="btn-primary" onclick="goStep(3)">Suivant →</button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 3 -->
+    <div class="step-block" id="step3" style="display:none;">
+      <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:.92rem;">Choisissez une date et un créneau disponible.</p>
+      <div class="form-group" style="max-width:280px; margin-bottom:1.5rem;">
+        <label>Date</label>
+        <input type="date" id="dateInput" required/>
+      </div>
+      <div id="creneauxContainer" style="color:var(--text-muted); font-size:.9rem;">
+        Sélectionnez une date pour voir les créneaux disponibles.
+      </div>
+      <div style="display:flex; gap:1rem; margin-top:2rem;">
+        <button type="button" class="btn-secondary" onclick="goStep(2)">← Retour</button>
+        <button type="button" class="btn-primary" id="btnStep3" disabled onclick="goStep(4)">Suivant →</button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 4 -->
+    <div class="step-block" id="step4" style="display:none;">
+      <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:.92rem;">Vérifiez et confirmez votre réservation.</p>
+      <div class="conf-card">
+        <div class="conf-row"><span class="conf-label">Service</span><span class="conf-value" id="confService">—</span></div>
+        <div class="conf-row"><span class="conf-label">Suppléments</span><span class="conf-value" id="confSupps">Aucun</span></div>
+        <div class="conf-row"><span class="conf-label">Date</span><span class="conf-value" id="confDate">—</span></div>
+        <div class="conf-row"><span class="conf-label">Heure</span><span class="conf-value" id="confHeure">—</span></div>
+        <div class="conf-row"><span class="conf-label">Durée</span><span class="conf-value" id="confDuree">—</span></div>
+        <div class="conf-row" style="padding-top:.8rem;">
+          <span style="font-weight:700;">Total</span>
+          <span class="price-badge" style="font-size:1.2rem;" id="confTotal">—</span>
         </div>
       </div>
+      <div class="form-group" style="margin-top:1.5rem;">
+        <label>Note pour le coiffeur (optionnel)</label>
+        <textarea name="note" rows="2" placeholder="Ex: je voudrais aussi une barbe..."></textarea>
+      </div>
+      <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+        <button type="button" class="btn-secondary" onclick="goStep(3)">← Retour</button>
+        <button type="submit" class="btn-primary" style="padding:.9rem 2.5rem;">
+          Envoyer la demande
+        </button>
+      </div>
+    </div>
+  </form>
 
-    </form>
-  </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.step-pill {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  background: #f0f0f0;
-  color: #888;
-  white-space: nowrap;
-  font-weight: 500;
-}
-@media (min-width: 576px) {
-  .step-pill { padding: 6px 14px; font-size: 13px; }
-}
-.step-pill.active {
-  background: var(--salon-gold, #c9a84c);
-  color: #fff;
-}
-.service-card { cursor: pointer; transition: all .2s; border: 2px solid transparent !important; }
-.service-card.selected { border: 2px solid #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.2) !important; }
-.service-card:hover { transform: translateY(-2px); }
-.supp-card { cursor: pointer; transition: all .15s; }
-.supp-card:has(input:checked) { background: rgba(201,168,76,.08); border-color: #c9a84c !important; }
-.btn-creneau { min-width: 60px; }
-@media (min-width: 576px) { .btn-creneau { min-width: 72px; } }
-.btn-creneau.selected { background: #c9a84c; color: #fff; border-color: #c9a84c; }
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -189,36 +131,28 @@ const today = new Date().toISOString().split('T')[0];
 document.getElementById('dateInput').min = today;
 
 let selectedService = null;
-let selectedHeure = null;
+let selectedHeure   = null;
 
-// ── Étapes ───────────────────────────────────────────
 function goStep(n) {
-  document.querySelectorAll('.step-block').forEach(b => b.classList.add('d-none'));
-  document.getElementById('step' + n).classList.remove('d-none');
+  document.querySelectorAll('.step-block').forEach(b => b.style.display = 'none');
+  document.getElementById('step' + n).style.display = 'block';
   document.querySelectorAll('.step-pill').forEach((p, i) => {
     p.classList.toggle('active', i < n);
   });
   if (n === 4) remplirConfirmation();
 }
 
-// ── Étape 1 : sélection service ───────────────────────
 document.querySelectorAll('.service-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
-    selectedService = {
-      id: card.dataset.id,
-      nom: card.dataset.nom,
-      prix: parseFloat(card.dataset.prix),
-      duree: card.dataset.duree
-    };
+    selectedService = { id: card.dataset.id, nom: card.dataset.nom, prix: parseFloat(card.dataset.prix), duree: card.dataset.duree };
     document.getElementById('hidServiceId').value = selectedService.id;
     document.getElementById('btnStep1').disabled = false;
     majRecapPrix();
   });
 });
 
-// ── Étape 2 : suppléments + recap prix ───────────────
 function majRecapPrix() {
   if (!selectedService) return;
   let total = selectedService.prix;
@@ -226,8 +160,7 @@ function majRecapPrix() {
   document.querySelectorAll('.supp-check:checked').forEach(cb => {
     const p = parseFloat(cb.dataset.prix);
     total += p;
-    suppsHtml += `<div class="d-flex justify-content-between small text-muted mb-1">
-      <span>${cb.dataset.nom}</span><span>+ ${p.toLocaleString()} FCFA</span></div>`;
+    suppsHtml += `<div class="recap-row"><span>${cb.dataset.nom}</span><span>+ ${p.toLocaleString()} FCFA</span></div>`;
   });
   document.getElementById('recapService').textContent = selectedService.prix.toLocaleString() + ' FCFA';
   document.getElementById('recapSuppsContainer').innerHTML = suppsHtml;
@@ -235,11 +168,10 @@ function majRecapPrix() {
 }
 document.querySelectorAll('.supp-check').forEach(cb => cb.addEventListener('change', majRecapPrix));
 
-// ── Étape 3 : créneaux ────────────────────────────────
 document.getElementById('dateInput').addEventListener('change', function() {
   if (!selectedService) return;
   const container = document.getElementById('creneauxContainer');
-  container.innerHTML = '<div class="spinner-border spinner-border-sm text-warning"></div> Chargement...';
+  container.innerHTML = '<span style="color:var(--text-muted)">Chargement...</span>';
   document.getElementById('hidDate').value = this.value;
   selectedHeure = null;
   document.getElementById('btnStep3').disabled = true;
@@ -247,17 +179,16 @@ document.getElementById('dateInput').addEventListener('change', function() {
   fetch(`/client/creneaux-disponibles?service_id=${selectedService.id}&date=${this.value}`)
     .then(r => r.json())
     .then(data => {
-      if (!data.creneaux.length) {
-        container.innerHTML = '<p class="text-warning small"><i class="bi bi-exclamation-triangle"></i> Aucun créneau disponible ce jour. Essayez une autre date.</p>';
+      if (!data.creneaux || !data.creneaux.length) {
+        container.innerHTML = '<p style="color:var(--accent); font-size:.88rem;">⚠ Aucun créneau disponible ce jour. Essayez une autre date.</p>';
         return;
       }
-      let html = '<div class="d-flex flex-wrap gap-2">';
+      let html = '<div style="display:flex; flex-wrap:wrap; gap:.6rem;">';
       data.creneaux.forEach(h => {
-        html += `<button type="button" class="btn btn-outline-secondary btn-creneau" data-heure="${h}">${h}</button>`;
+        html += `<button type="button" class="btn-creneau" data-heure="${h}">${h}</button>`;
       });
       html += '</div>';
       container.innerHTML = html;
-
       container.querySelectorAll('.btn-creneau').forEach(btn => {
         btn.addEventListener('click', () => {
           container.querySelectorAll('.btn-creneau').forEach(b => b.classList.remove('selected'));
@@ -270,7 +201,6 @@ document.getElementById('dateInput').addEventListener('change', function() {
     });
 });
 
-// ── Étape 4 : confirmation ────────────────────────────
 function remplirConfirmation() {
   if (!selectedService) return;
   let total = selectedService.prix;

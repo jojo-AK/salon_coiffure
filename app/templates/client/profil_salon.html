@@ -3,129 +3,89 @@
 
 {% block content %}
 
-<!-- EN-TETE -->
-<div class="text-center py-4 py-md-5 mb-4 rounded-4 px-2" style="background: linear-gradient(135deg, #1a1a1a, #3a3a3a); color: white;">
+<!-- HERO SALON -->
+<div class="page-hero">
   {% if profil.photo_profil %}
     <img src="{{ url_for('static', filename='uploads/' + profil.photo_profil) }}"
-         class="rounded-circle shadow mb-3"
-         style="width:110px; height:110px; object-fit:cover; border: 3px solid #c9a84c;">
+         style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); margin-bottom:1.2rem; position:relative; z-index:1;">
   {% else %}
-    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-         style="width:110px; height:110px; background:#2a2a2a; border: 3px solid #c9a84c;">
-      <i class="bi bi-scissors" style="font-size:2.5rem; color:#c9a84c;"></i>
-    </div>
+    <div style="width:120px; height:120px; border-radius:50%; background:var(--bg-elevated); border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem; font-size:3rem; position:relative; z-index:1;">✂️</div>
+  {% endif %}
+  <div class="section-tag">Notre salon</div>
+  <h1>{{ profil.nom_salon or 'MonSalon' }}</h1>
+  <p>{{ profil.bio or 'Votre coiffeur de confiance' }}</p>
+  <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1.5rem; position:relative; z-index:1;">
+    {% if current_user.is_authenticated and not current_user.is_admin() %}
+      <a href="{{ url_for('client.reserver') }}" class="btn-primary">Réserver maintenant</a>
+    {% elif not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn-primary">Réserver maintenant</a>
+    {% endif %}
+    <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
+       class="btn-secondary" target="_blank">WhatsApp</a>
+  </div>
+</div>
+
+<div class="page-wrapper" style="padding-top:2rem;">
+
+  <!-- PHOTOS INTÉRIEUR -->
+  {% if photos %}
+  <div class="section-header reveal" style="text-align:left; margin-bottom:1.5rem;">
+    <div class="section-tag">Galerie</div>
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700;">Notre salon</h2>
+  </div>
+  <div class="photos-grid reveal" style="margin-bottom:3rem;">
+    {% for photo in photos %}
+    <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="Photo du salon">
+    {% endfor %}
+  </div>
   {% endif %}
 
-  <h1 class="fw-bold fs-4 fs-md-3 mb-1">{{ profil.nom_salon or 'MonSalon' }}</h1>
-  <p class="text-secondary mb-3">{{ profil.bio or 'Votre coiffeur de confiance' }}</p>
-
-  <div class="d-flex justify-content-center flex-wrap gap-3 mb-3">
-    {% if profil.adresse %}
-      <span class="text-secondary small">
-        <i class="bi bi-geo-alt text-warning"></i> {{ profil.adresse }}
-      </span>
-    {% else %}
-      <span class="text-secondary small">
-        <i class="bi bi-geo-alt text-warning"></i> Lomé, Togo
-      </span>
-    {% endif %}
-    {% if profil.horaires %}
-      <span class="text-secondary small">
-        <i class="bi bi-clock text-warning"></i> {{ profil.horaires }}
-      </span>
-    {% else %}
-      <span class="text-secondary small">
-        <i class="bi bi-clock text-warning"></i> Lun – Sam : 8h – 20h
-      </span>
-    {% endif %}
+  <!-- NOS SERVICES -->
+  <div class="section-header reveal" style="text-align:left; margin-bottom:1.5rem;">
+    <div class="section-tag">Prestations</div>
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700;">Nos services</h2>
   </div>
-
-  <div class="d-flex justify-content-center gap-2 gap-md-3 flex-wrap">
-    {% if current_user.is_authenticated and not current_user.is_admin() %}
-      <a href="{{ url_for('client.reserver') }}" class="btn btn-gold px-4">
-        <i class="bi bi-calendar-plus"></i> Réserver maintenant
-      </a>
-    {% elif not current_user.is_authenticated %}
-      <a href="{{ url_for('auth.register') }}" class="btn btn-gold px-4">
-        <i class="bi bi-calendar-plus"></i> Réserver maintenant
-      </a>
-    {% endif %}
-    <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
-       class="btn btn-success px-4" target="_blank">
-      <i class="bi bi-whatsapp"></i> WhatsApp
-    </a>
-  </div>
-</div>
-
-<!-- PHOTOS INTERIEUR -->
-{% if photos %}
-  <h4 class="fw-bold mb-3"><i class="bi bi-images text-warning"></i> Notre salon</h4>
-  <div class="row g-2 g-md-3 mb-5">
-    {% for photo in photos %}
-      <div class="col-6 col-md-4">
-        <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
-             class="img-fluid rounded-3 shadow-sm w-100"
-             style="height:200px; object-fit:cover;"
-             alt="Photo du salon">
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
-<!-- NOS SERVICES -->
-<h4 class="fw-bold mb-3"><i class="bi bi-scissors text-warning"></i> Nos services</h4>
-{% if services %}
-  <div class="row g-2 g-md-3 mb-5">
+  {% if services %}
+  <div class="services-grid reveal" style="margin-bottom:3rem;">
     {% for service in services %}
-      <div class="col-12 col-sm-6 col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-          {% if service.photo %}
-            <img src="{{ url_for('static', filename='uploads/' + service.photo) }}"
-                 class="card-img-top img-fluid" style="height:160px; object-fit:cover;" alt="{{ service.nom }}">
-          {% else %}
-            <div class="d-flex align-items-center justify-content-center"
-                 style="height:160px; background:#2a2a2a;">
-              <i class="bi bi-scissors" style="font-size:2rem; color:#c9a84c;"></i>
-            </div>
-          {% endif %}
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <h6 class="fw-bold mb-0">{{ service.nom }}</h6>
-              <span class="badge bg-warning text-dark">{{ service.prix|int }} FCFA</span>
-            </div>
-            {% if service.description %}
-              <p class="text-muted small mb-2">{{ service.description }}</p>
-            {% endif %}
-            <span class="text-muted small">
-              <i class="bi bi-clock"></i> {{ service.duree_minutes }} min
-            </span>
-          </div>
+    <div class="service-card">
+      <div class="service-photo">
+        {% if service.photo %}
+          <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" alt="{{ service.nom }}">
+        {% else %}✂️{% endif %}
+      </div>
+      <div class="service-body">
+        <div class="service-name">{{ service.nom }}</div>
+        {% if service.description %}<div class="service-desc">{{ service.description }}</div>{% endif %}
+        <div class="service-footer">
+          <span class="price-badge">{{ service.prix|int }} FCFA</span>
+          <span style="font-size:.8rem; color:var(--text-muted);">⏱ {{ service.duree_minutes }} min</span>
         </div>
       </div>
+    </div>
     {% endfor %}
   </div>
-{% endif %}
+  {% endif %}
 
-<!-- INFOS PRATIQUES -->
-<div class="row g-4 mt-2 pt-3 border-top">
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-clock-history text-warning" style="font-size:2rem;"></i>
-    <h6 class="mt-2 fw-semibold">Horaires</h6>
-    <p class="text-muted small mb-0">{{ profil.horaires or 'Lun – Sam : 8h – 20h' }}</p>
+  <!-- INFOS -->
+  <div class="info-grid">
+    <div class="card info-card reveal stagger-1">
+      <div class="info-icon">🕐</div>
+      <h4>Horaires</h4>
+      <p>{{ profil.horaires or 'Lun – Sam : 8h – 20h' }}</p>
+    </div>
+    <div class="card info-card reveal stagger-2">
+      <div class="info-icon">📍</div>
+      <h4>Adresse</h4>
+      <p>{{ profil.adresse or 'Lomé, Togo' }}</p>
+    </div>
+    <div class="card info-card reveal stagger-3">
+      <div class="info-icon">💬</div>
+      <h4>Contact</h4>
+      <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
+         target="_blank">{{ profil.whatsapp or '+228 90 00 00 00' }}</a>
+    </div>
   </div>
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-geo-alt text-warning" style="font-size:2rem;"></i>
-    <h6 class="mt-2 fw-semibold">Adresse</h6>
-    <p class="text-muted small mb-0">{{ profil.adresse or 'Lomé, Togo' }}</p>
-  </div>
-  <div class="col-12 col-md-4 text-center">
-    <i class="bi bi-whatsapp text-success" style="font-size:2rem;"></i>
-    <h6 class="mt-2 fw-semibold">Contact</h6>
-    <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
-       class="text-success small" target="_blank">
-      {{ profil.whatsapp or '+228 90 00 00 00' }}
-    </a>
-  </div>
+
 </div>
-
 {% endblock %}

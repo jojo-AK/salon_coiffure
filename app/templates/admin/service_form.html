@@ -1,57 +1,66 @@
 {% extends "base.html" %}
-{% block title %}{% if service %}Modifier{% else %}Ajouter{% endif %} un service – MonSalon{% endblock %}
+{% block title %}{% if service %}Modifier{% else %}Ajouter{% endif %} un service – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-6">
-    <h2 class="fw-bold mb-4">
-      <i class="bi bi-scissors text-warning"></i>
-      {% if service %}Modifier le service{% else %}Ajouter un service{% endif %}
-    </h2>
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-4">
-        <form method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nom du service</label>
-            <input type="text" name="nom" class="form-control" placeholder="Ex: Dégradé, Tresse..."
-                   value="{{ service.nom if service else '' }}" required/>
-          </div>
-          <div class="row g-3 mb-3">
-            <div class="col-6">
-              <label class="form-label fw-semibold">Prix (FCFA)</label>
-              <input type="number" name="prix" class="form-control" placeholder="Ex: 3000"
-                     min="0" step="100" value="{{ service.prix|int if service else '' }}" required/>
-            </div>
-            <div class="col-6">
-              <label class="form-label fw-semibold">Durée (minutes)</label>
-              <input type="number" name="duree_minutes" class="form-control" placeholder="Ex: 30"
-                     min="5" step="5" value="{{ service.duree_minutes if service else '' }}" required/>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Description (optionnel)</label>
-            <textarea name="description" class="form-control" rows="2">{{ service.description if service else '' }}</textarea>
-          </div>
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Photo du service (optionnel)</label>
-            {% if service and service.photo %}
-              <div class="mb-2">
-                <img src="{{ url_for('static', filename='uploads/' + service.photo) }}"
-                     class="rounded" style="height:80px;object-fit:cover;" alt="Photo actuelle">
-                <span class="text-muted small ms-2">Photo actuelle</span>
-              </div>
-            {% endif %}
-            <input type="file" name="photo" class="form-control" accept="image/*"/>
-            <div class="form-text text-muted">JPG, PNG ou WEBP. Recommandé : 600×400px.</div>
-          </div>
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-gold flex-fill py-2">
-              <i class="bi bi-check-lg"></i> {% if service %}Enregistrer{% else %}Ajouter{% endif %}
-            </button>
-            <a href="{{ url_for('admin.services') }}" class="btn btn-outline-secondary px-4">Annuler</a>
-          </div>
-        </form>
-      </div>
-    </div>
+<div class="page-wrapper" style="max-width:640px;">
+
+  <div style="margin-bottom:2rem;">
+    <div class="section-tag">Administration</div>
+    <h1 class="page-title" style="margin-bottom:0;">
+      {% if service %}Modifier le <em>service</em>{% else %}Ajouter un <em>service</em>{% endif %}
+    </h1>
   </div>
+
+  <div class="card" style="padding:2rem;">
+    <form method="POST" enctype="multipart/form-data">
+
+      <div class="form-group">
+        <label>Nom du service</label>
+        <input type="text" name="nom" placeholder="Ex: Dégradé, Tresse..."
+               value="{{ service.nom if service else '' }}" required/>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="form-group">
+          <label>Prix (FCFA)</label>
+          <input type="number" name="prix" placeholder="Ex: 3000"
+                 min="0" step="100" value="{{ service.prix|int if service else '' }}" required/>
+        </div>
+        <div class="form-group">
+          <label>Durée (minutes)</label>
+          <input type="number" name="duree_minutes" placeholder="Ex: 30"
+                 min="5" step="5" value="{{ service.duree_minutes if service else '' }}" required/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description <span style="color:var(--text-muted); font-weight:400;">(optionnel)</span></label>
+        <textarea name="description" rows="2" placeholder="Courte description du service">{{ service.description if service else '' }}</textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom:2rem;">
+        <label>Photo du service <span style="color:var(--text-muted); font-weight:400;">(optionnel)</span></label>
+        {% if service and service.photo %}
+        <div style="margin-bottom:.8rem;">
+          <img src="{{ url_for('static', filename='uploads/' + service.photo) }}"
+               style="height:80px; border-radius:8px; object-fit:cover;" alt="Photo actuelle">
+          <span style="color:var(--text-muted); font-size:.82rem; margin-left:.6rem;">Photo actuelle</span>
+        </div>
+        {% endif %}
+        <input type="file" name="photo" accept="image/*"
+               style="background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; padding:.6rem; width:100%; color:var(--text-primary); font-size:.88rem;"/>
+        <span style="color:var(--text-muted); font-size:.78rem;">JPG, PNG ou WEBP. Recommandé : 600×400px.</span>
+      </div>
+
+      <div style="display:flex; gap:1rem;">
+        <button type="submit" class="btn-primary" style="flex:1; justify-content:center; padding:.9rem;">
+          {% if service %}Enregistrer les modifications{% else %}Ajouter le service{% endif %}
+        </button>
+        <a href="{{ url_for('admin.services') }}" class="btn-secondary" style="padding:.9rem 1.5rem;">Annuler</a>
+      </div>
+
+    </form>
+  </div>
+
 </div>
 {% endblock %}

@@ -1,268 +1,189 @@
 {% extends "base.html" %}
-{% block title %}Dashboard Coiffeur – MonSalon{% endblock %}
-{% block extra_css %}
-<style>
-@media (min-width: 768px) {
-  .planning-heure { min-width: 80px !important; padding: 16px 8px !important; }
-}
-</style>
-{% endblock %}
-{% block content %}
-<h2 class="fw-bold mb-3 mb-md-4 fs-5 fs-md-4"><i class="bi bi-grid text-warning"></i> Dashboard coiffeur</h2>
+{% block title %}Dashboard – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
 
-<!-- STATS -->
-<div class="row g-3 mb-5">
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center p-3">
-      <div class="fs-2 fw-bold text-warning">{{ rdv_attente|length }}</div>
-      <div class="small text-muted">En attente</div>
+{% block content %}
+<div class="page-wrapper">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">
+    <div>
+      <h1 class="page-title">Dashboard <em>Coiffeur</em></h1>
+      <p class="page-subtitle" style="margin-bottom:0;">Gérez vos rendez-vous et votre planning</p>
     </div>
+    <a href="{{ url_for('admin.profil') }}" class="btn-secondary" style="font-size:.85rem;">⚙ Profil salon</a>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center p-3">
-      <div class="fs-2 fw-bold text-success">{{ rdv_acceptes|length }}</div>
-      <div class="small text-muted">Confirmés aujourd'hui</div>
+
+  <!-- STATS -->
+  <div class="stats-grid" style="margin-bottom:3rem;">
+    <div class="stat-card reveal stagger-1">
+      <div class="stat-number">{{ rdv_attente|length }}</div>
+      <div class="stat-label">En attente</div>
     </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center p-3">
-      <div class="fs-2 fw-bold text-info">{{ rdv_annulations|length }}</div>
-      <div class="small text-muted">Annulations à traiter</div>
+    <div class="stat-card reveal stagger-2">
+      <div class="stat-number">{{ rdv_acceptes|length }}</div>
+      <div class="stat-label">Confirmés aujourd'hui</div>
     </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center p-3">
-      <a href="{{ url_for('admin.services') }}" class="text-decoration-none">
-        <div class="fs-2 fw-bold text-primary"><i class="bi bi-scissors"></i></div>
-        <div class="small text-muted">Services</div>
+    <div class="stat-card reveal stagger-3">
+      <div class="stat-number">{{ rdv_annulations|length }}</div>
+      <div class="stat-label">Annulations à traiter</div>
+    </div>
+    <div class="stat-card reveal stagger-4">
+      <a href="{{ url_for('admin.services') }}" style="text-decoration:none;">
+        <div class="stat-number" style="font-size:1.6rem;">✂</div>
+        <div class="stat-label">Gérer services</div>
       </a>
     </div>
   </div>
-</div>
 
-<!-- DEMANDES D'ANNULATION -->
-{% if rdv_annulations %}
-<h4 class="fw-bold mb-3">
-  <i class="bi bi-x-circle text-info"></i> Demandes d'annulation
-  <span class="badge bg-info text-dark ms-2">{{ rdv_annulations|length }}</span>
-</h4>
-<div class="row g-3 mb-5">
-  {% for rdv in rdv_annulations %}
-  <div class="col-12 col-md-6">
-    <div class="card border-info border-start border-4 shadow-sm">
-      <div class="card-body">
-        <div class="d-flex justify-content-between mb-1">
-          <strong>{{ rdv.service.nom }}</strong>
-          <span class="text-muted small">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
+  <!-- DEMANDES D'ANNULATION -->
+  {% if rdv_annulations %}
+  <div style="margin-bottom:3rem;">
+    <div class="section-tag">À traiter</div>
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; margin-bottom:1.2rem;">
+      Demandes d'annulation <span style="font-size:.8rem; background:rgba(168,85,247,.15); color:#c084fc; padding:.2rem .7rem; border-radius:50px; border:1px solid rgba(168,85,247,.25);">{{ rdv_annulations|length }}</span>
+    </h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1.2rem;">
+      {% for rdv in rdv_annulations %}
+      <div class="rdv-card" style="border-left:3px solid #c084fc;">
+        <div class="rdv-card-header">
+          <div class="rdv-card-title">{{ rdv.service.nom }}</div>
+          <span style="font-size:.82rem; color:var(--text-muted);">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
         </div>
-        <p class="small text-muted mb-1">
-          <i class="bi bi-person"></i> {{ rdv.client.nom }} — {{ rdv.client.email }}
-        </p>
-        {% if rdv.client.telephone %}
-        <p class="small text-muted mb-1">
-          <i class="bi bi-telephone"></i>
-          <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
-        </p>
-        {% endif %}
-        <p class="small text-muted mb-2">
-          <i class="bi bi-clock"></i>
-          {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}
-        </p>
-        <p class="small text-warning fw-semibold mb-2">
-          <i class="bi bi-cash"></i> {{ rdv.prix_total|int }} FCFA
-        </p>
-        <div class="d-flex gap-2">
-          <form method="POST" action="{{ url_for('admin.confirmer_annulation', rdv_id=rdv.id) }}" class="flex-fill">
-            <button type="submit" class="btn btn-warning w-100 btn-sm">
-              <i class="bi bi-check-lg"></i> Confirmer annulation
-            </button>
+        <div class="rdv-meta">
+          <div class="rdv-meta-item">👤 {{ rdv.client.nom }} — {{ rdv.client.email }}</div>
+          {% if rdv.client.telephone %}<div class="rdv-meta-item">📞 <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.client.telephone }}</a></div>{% endif %}
+          <div class="rdv-meta-item">🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</div>
+          <div class="rdv-meta-item" style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</div>
+        </div>
+        <div style="display:flex; gap:.8rem;">
+          <form method="POST" action="{{ url_for('admin.confirmer_annulation', rdv_id=rdv.id) }}" style="flex:1;">
+            <button type="submit" class="btn-secondary" style="width:100%; justify-content:center; border-color:rgba(201,169,110,.3); color:var(--accent); font-size:.82rem; padding:.6rem;">✓ Confirmer</button>
           </form>
-          <form method="POST" action="{{ url_for('admin.refuser_annulation', rdv_id=rdv.id) }}" class="flex-fill">
-            <button type="submit" class="btn btn-outline-secondary w-100 btn-sm">
-              <i class="bi bi-x-lg"></i> Refuser annulation
-            </button>
+          <form method="POST" action="{{ url_for('admin.refuser_annulation', rdv_id=rdv.id) }}" style="flex:1;">
+            <button type="submit" class="btn-secondary" style="width:100%; justify-content:center; font-size:.82rem; padding:.6rem;">✕ Refuser</button>
           </form>
         </div>
       </div>
+      {% endfor %}
     </div>
   </div>
-  {% endfor %}
-</div>
-{% endif %}
+  {% endif %}
 
-<!-- PLANNING DU JOUR -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
-  <h4 class="fw-bold mb-0 fs-6 fs-md-5">
-    <i class="bi bi-calendar-day text-warning"></i>
-    Planning — <span class="text-warning">{{ aujourd_hui }}</span>
-  </h4>
-  <div class="d-flex gap-2 flex-wrap">
-    <a href="{{ url_for('admin.dashboard', date=date_precedente) }}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-chevron-left"></i> Hier
-    </a>
-    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-warning btn-sm">Aujourd'hui</a>
-    <a href="{{ url_for('admin.dashboard', date=date_suivante) }}" class="btn btn-outline-secondary btn-sm">
-      Demain <i class="bi bi-chevron-right"></i>
-    </a>
+  <!-- PLANNING DU JOUR -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.2rem;">
+    <div>
+      <div class="section-tag">Planning</div>
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700;">
+        {{ aujourd_hui }}
+      </h2>
+    </div>
+    <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+      <a href="{{ url_for('admin.dashboard', date=date_precedente) }}" class="btn-secondary" style="padding:.5rem 1rem; font-size:.82rem;">← Hier</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn-secondary" style="padding:.5rem 1rem; font-size:.82rem; border-color:var(--accent); color:var(--accent);">Aujourd'hui</a>
+      <a href="{{ url_for('admin.dashboard', date=date_suivante) }}" class="btn-secondary" style="padding:.5rem 1rem; font-size:.82rem;">Demain →</a>
+    </div>
   </div>
-</div>
 
-<div class="card border-0 shadow-sm mb-5">
-  <div class="card-body p-0">
+  <div class="card" style="padding:0; margin-bottom:3rem; overflow:hidden;">
     {% if rdv_du_jour %}
-    {% for rdv in rdv_du_jour %}
-    <div class="d-flex align-items-stretch border-bottom">
-      <div class="d-flex align-items-center justify-content-center fw-bold planning-heure"
-        style="min-width:55px; background:#f8f9fa; border-right:1px solid #dee2e6; padding:12px 6px;">
-        {{ rdv.debut_datetime.strftime('%H:%M') }}
-      </div>
-      <div class="flex-fill p-3
-            {% if rdv.statut == 'accepte' %}border-start border-4 border-success
-            {% elif rdv.statut == 'en_attente' %}border-start border-4 border-warning
-            {% elif rdv.statut == 'annulation_demandee' %}border-start border-4 border-info
-            {% else %}border-start border-4 border-danger{% endif %}">
-
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-          <div>
-            <span class="fw-bold">{{ rdv.client.nom }}</span>
-            <span class="text-muted ms-2">·</span>
-            <span class="ms-2">{{ rdv.service.nom }}</span>
-            {% if rdv.liste_supplements %}
-            <span class="text-muted ms-1 small">
-              + {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}
-            </span>
+      {% for rdv in rdv_du_jour %}
+      <div class="planning-row planning-accent-{{ rdv.statut if rdv.statut in ['accepte','annule'] else ('annul' if rdv.statut == 'annulation_demandee' else ('refuse' if rdv.statut == 'refuse' else 'attente')) }}">
+        <div class="planning-time">{{ rdv.debut_datetime.strftime('%H:%M') }}</div>
+        <div class="planning-body">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:.5rem; margin-bottom:.4rem;">
+            <div>
+              <strong>{{ rdv.client.nom }}</strong>
+              <span style="color:var(--text-muted); margin:0 .4rem;">·</span>
+              <span>{{ rdv.service.nom }}</span>
+              {% if rdv.liste_supplements %}
+                <span style="color:var(--text-muted); font-size:.82rem;"> + {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}</span>
+              {% endif %}
+            </div>
+            {% if rdv.statut == 'en_attente' %}
+              <span class="badge-statut badge-attente">⏳ En attente</span>
+            {% elif rdv.statut == 'accepte' %}
+              <span class="badge-statut badge-accepte">✓ Confirmé</span>
+            {% elif rdv.statut == 'annulation_demandee' %}
+              <span class="badge-statut badge-annul-dem">⏳ Annulation demandée</span>
+            {% elif rdv.statut == 'termine' %}
+              <span class="badge-statut badge-termine">✓ Terminé</span>
+            {% else %}
+              <span class="badge-statut badge-refuse">✕ {{ rdv.statut | replace('_',' ') | title }}</span>
             {% endif %}
           </div>
-          <div class="d-flex align-items-center gap-2">
-            <span class="text-muted small">
-              <i class="bi bi-clock"></i>
-              {{ rdv.debut_datetime.strftime('%H:%M') }} →
-              {{ rdv.fin_datetime.strftime('%H:%M') }}
-            </span>
-            <span class="badge
-                  {% if rdv.statut == 'accepte' %}bg-success
-                  {% elif rdv.statut == 'en_attente' %}bg-warning text-dark
-                  {% elif rdv.statut == 'annulation_demandee' %}bg-info text-dark
-                  {% else %}bg-danger{% endif %}">
-              {{ rdv.statut | replace('_', ' ') | title }}
-            </span>
+          <div style="display:flex; flex-wrap:wrap; gap:1.2rem; font-size:.82rem; color:var(--text-muted); margin-bottom:.6rem;">
+            <span>🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</span>
+            <span style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</span>
+            <span>{{ rdv.client.email }}</span>
+            {% if rdv.client.telephone %}<a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">📞 {{ rdv.client.telephone }}</a>{% endif %}
+            {% if rdv.note_client %}<span style="font-style:italic;">💬 {{ rdv.note_client }}</span>{% endif %}
           </div>
-        </div>
-
-        <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
-          <span class="text-warning small fw-semibold">
-            <i class="bi bi-cash"></i> {{ rdv.prix_total|int }} FCFA
-          </span>
-          <span class="text-muted small">
-            <i class="bi bi-envelope"></i> {{ rdv.client.email }}
-          </span>
-          {% if rdv.client.telephone %}
-          <span class="text-muted small">
-            <i class="bi bi-telephone"></i>
-            <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
-          </span>
+          {% if rdv.statut == 'en_attente' %}
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+            <form method="POST" action="{{ url_for('admin.accepter_rdv', rdv_id=rdv.id) }}">
+              <button type="submit" class="btn-primary" style="padding:.5rem 1.2rem; font-size:.82rem;">✓ Accepter</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.refuser_rdv', rdv_id=rdv.id) }}">
+              <button type="submit" class="btn-secondary" style="padding:.5rem 1.2rem; font-size:.82rem; border-color:rgba(239,68,68,.3); color:#f87171;">✕ Refuser</button>
+            </form>
+          </div>
+          {% elif rdv.statut == 'accepte' %}
+          <form method="POST" action="{{ url_for('admin.terminer_rdv', rdv_id=rdv.id) }}" style="display:inline;">
+            <button type="submit" class="btn-secondary" style="padding:.5rem 1.2rem; font-size:.82rem; border-color:rgba(96,165,250,.3); color:#60a5fa;">✓ Marquer terminé</button>
+          </form>
+          {% elif rdv.statut == 'annulation_demandee' %}
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+            <form method="POST" action="{{ url_for('admin.confirmer_annulation', rdv_id=rdv.id) }}">
+              <button type="submit" class="btn-secondary" style="padding:.5rem 1.2rem; font-size:.82rem; border-color:rgba(201,169,110,.3); color:var(--accent);">✓ Confirmer annulation</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.refuser_annulation', rdv_id=rdv.id) }}">
+              <button type="submit" class="btn-secondary" style="padding:.5rem 1.2rem; font-size:.82rem;">✕ Refuser annulation</button>
+            </form>
+          </div>
           {% endif %}
-          {% if rdv.note_client %}
-          <span class="text-muted small fst-italic">
-            <i class="bi bi-chat-left-text"></i> {{ rdv.note_client }}
-          </span>
-          {% endif %}
         </div>
-
-        {% if rdv.statut == 'en_attente' %}
-        <div class="d-flex gap-2 mt-2">
-          <form method="POST" action="{{ url_for('admin.accepter_rdv', rdv_id=rdv.id) }}">
-            <button type="submit" class="btn btn-success btn-sm">
-              <i class="bi bi-check-lg"></i> Accepter
-            </button>
-          </form>
-          <form method="POST" action="{{ url_for('admin.refuser_rdv', rdv_id=rdv.id) }}">
-            <button type="submit" class="btn btn-outline-danger btn-sm">
-              <i class="bi bi-x-lg"></i> Refuser
-            </button>
-          </form>
-        </div>
-        {% elif rdv.statut == 'annulation_demandee' %}
-        <div class="d-flex gap-2 mt-2">
-          <form method="POST" action="{{ url_for('admin.confirmer_annulation', rdv_id=rdv.id) }}">
-            <button type="submit" class="btn btn-warning btn-sm">
-              <i class="bi bi-check-lg"></i> Confirmer annulation
-            </button>
-          </form>
-          <form method="POST" action="{{ url_for('admin.refuser_annulation', rdv_id=rdv.id) }}">
-            <button type="submit" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-x-lg"></i> Refuser annulation
-            </button>
-          </form>
-        </div>
-        {% endif %}
-
       </div>
-    </div>
-    {% endfor %}
+      {% endfor %}
     {% else %}
-    <div class="text-center py-5 text-muted">
-      <i class="bi bi-calendar-x" style="font-size:3rem; color:#ccc;"></i>
-      <p class="mt-3">Aucun rendez-vous ce jour.</p>
+    <div style="text-align:center; padding:4rem; color:var(--text-muted);">
+      <div style="font-size:3rem; opacity:.2; margin-bottom:.8rem;">📅</div>
+      <p>Aucun rendez-vous ce jour.</p>
     </div>
     {% endif %}
   </div>
-</div>
 
-<!-- DEMANDES EN ATTENTE -->
-{% if rdv_attente %}
-<h4 class="fw-bold mb-3">
-  <i class="bi bi-hourglass-split text-warning"></i> Demandes en attente
-  <span class="badge bg-warning text-dark ms-2">{{ rdv_attente|length }}</span>
-</h4>
-<div class="row g-3">
-  {% for rdv in rdv_attente %}
-  <div class="col-12 col-md-6">
-    <div class="card border-warning border-start border-4 shadow-sm">
-      <div class="card-body">
-        <div class="d-flex justify-content-between mb-1">
-          <strong>{{ rdv.service.nom }}</strong>
-          <span class="text-muted small">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
-        </div>
-        <p class="small text-muted mb-1">
-          <i class="bi bi-person"></i> {{ rdv.client.nom }} — {{ rdv.client.email }}
-        </p>
-        {% if rdv.client.telephone %}
-        <p class="small text-muted mb-1">
-          <i class="bi bi-telephone"></i>
-          <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" class="text-decoration-none">{{ rdv.client.telephone }}</a>
-        </p>
-        {% endif %}
-        <p class="small text-muted mb-2">
-          <i class="bi bi-clock"></i>
-          {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}
-        </p>
-        {% if rdv.liste_supplements %}
-        <p class="small text-muted mb-2">
-          <i class="bi bi-plus-circle"></i>
-          {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}
-        </p>
-        {% endif %}
-        <p class="small text-warning fw-semibold mb-2">
-          <i class="bi bi-cash"></i> {{ rdv.prix_total|int }} FCFA
-        </p>
-        <div class="d-flex gap-2">
-          <form method="POST" action="{{ url_for('admin.accepter_rdv', rdv_id=rdv.id) }}" class="flex-fill">
-            <button type="submit" class="btn btn-success w-100 btn-sm">
-              <i class="bi bi-check-lg"></i> Accepter
-            </button>
-          </form>
-          <form method="POST" action="{{ url_for('admin.refuser_rdv', rdv_id=rdv.id) }}" class="flex-fill">
-            <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
-              <i class="bi bi-x-lg"></i> Refuser
-            </button>
-          </form>
-        </div>
+  <!-- DEMANDES EN ATTENTE -->
+  {% if rdv_attente %}
+  <div class="section-tag" style="margin-bottom:.5rem;">À traiter</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; margin-bottom:1.2rem;">
+    Demandes en attente <span style="font-size:.8rem; background:rgba(201,169,110,.15); color:var(--accent); padding:.2rem .7rem; border-radius:50px; border:1px solid rgba(201,169,110,.25);">{{ rdv_attente|length }}</span>
+  </h2>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1.2rem;">
+    {% for rdv in rdv_attente %}
+    <div class="rdv-card" style="border-left:3px solid var(--accent);">
+      <div class="rdv-card-header">
+        <div class="rdv-card-title">{{ rdv.service.nom }}</div>
+        <span style="font-size:.82rem; color:var(--text-muted);">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
+      </div>
+      <div class="rdv-meta">
+        <div class="rdv-meta-item">👤 {{ rdv.client.nom }} — {{ rdv.client.email }}</div>
+        {% if rdv.client.telephone %}<div class="rdv-meta-item">📞 <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.client.telephone }}</a></div>{% endif %}
+        <div class="rdv-meta-item">🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</div>
+        {% if rdv.liste_supplements %}<div class="rdv-meta-item">➕ {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}</div>{% endif %}
+        <div class="rdv-meta-item" style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</div>
+        {% if rdv.note_client %}<div class="rdv-meta-item" style="font-style:italic;">💬 {{ rdv.note_client }}</div>{% endif %}
+      </div>
+      <div style="display:flex; gap:.8rem;">
+        <form method="POST" action="{{ url_for('admin.accepter_rdv', rdv_id=rdv.id) }}" style="flex:1;">
+          <button type="submit" class="btn-primary" style="width:100%; justify-content:center; font-size:.82rem; padding:.7rem;">✓ Accepter</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.refuser_rdv', rdv_id=rdv.id) }}" style="flex:1;">
+          <button type="submit" class="btn-secondary" style="width:100%; justify-content:center; font-size:.82rem; padding:.7rem; border-color:rgba(239,68,68,.3); color:#f87171;">✕ Refuser</button>
+        </form>
       </div>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
-{% endif %}
+  {% endif %}
 
+</div>
 {% endblock %}
