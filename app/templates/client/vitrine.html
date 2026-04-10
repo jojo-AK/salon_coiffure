@@ -1,89 +1,1144 @@
 {% extends "base.html" %}
-{% block title %}{{ profil_salon.nom_salon if profil_salon else 'MonSalon' }} – Accueil{% endblock %}
+{% block title %}{{ profil_salon.nom_salon if profil_salon else 'MonSalon' }} — Coiffure Premium{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VITRINE PREMIUM — Variables & overrides locaux
+   (complète style.css sans le casser)
+============================================================ */
+:root {
+  --black:      #0a0a0a;
+  --black-2:    #111111;
+  --black-3:    #1a1a1a;
+  --black-4:    #222222;
+  --gold:       #c9a96e;
+  --gold-light: #dfc08a;
+  --gold-dark:  #a8854e;
+  --white-warm: #f5f0eb;
+  --white-2:    #e8e0d6;
+  --muted-v:    #888880;
+  --muted-2:    #666660;
+  --shadow-gold: 0 0 30px rgba(201,169,110,.15);
+}
+
+/* --- Layout principal page vitrine --- */
+.vitrine-wrap { overflow-x: hidden; }
+
+/* ===================== HERO ===================== */
+.v-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  padding-top: 72px;
+}
+
+.v-hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 70% 40%, rgba(201,169,110,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 10% 90%, rgba(201,169,110,.04) 0%, transparent 50%),
+    #0a0a0a;
+}
+
+.v-hero-dots {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(201,169,110,.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 60% 50% at 80% 30%, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 80% 30%, black, transparent);
+}
+
+.v-hero-inner {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(4rem, 8vw, 7rem);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+}
+
+.v-hero-tag {
+  display: inline-flex; align-items: center; gap: .7rem;
+  padding: .45rem 1rem;
+  background: rgba(201,169,110,.1);
+  border: 1px solid rgba(201,169,110,.2);
+  border-radius: 100px;
+  font-size: .78rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 2rem;
+}
+
+.v-tag-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.5; transform:scale(.8); }
+}
+
+.v-hero-h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin-bottom: 1.5rem;
+  color: #f5f0eb;
+}
+
+.v-hero-h1 span { display: block; }
+.v-hero-h1 .accent { color: var(--gold); font-style: italic; }
+
+.v-hero-p {
+  font-size: 1.05rem;
+  color: var(--muted-v);
+  line-height: 1.75;
+  max-width: 420px;
+  margin-bottom: 2.5rem;
+}
+
+.v-hero-actions {
+  display: flex; align-items: center;
+  gap: 1rem; flex-wrap: wrap;
+}
+
+/* Bouton or vitrine */
+.v-btn-gold {
+  display: inline-flex; align-items: center; gap: .55rem;
+  padding: .9rem 2rem;
+  background: var(--gold);
+  color: #0a0a0a;
+  font-weight: 600; font-size: .9rem;
+  letter-spacing: .04em; text-transform: uppercase;
+  border-radius: 8px;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+}
+
+.v-btn-gold:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-gold);
+}
+
+.v-btn-ghost {
+  display: inline-flex; align-items: center; gap: .55rem;
+  padding: .9rem 2rem;
+  background: transparent;
+  color: #f5f0eb;
+  font-weight: 500; font-size: .9rem;
+  letter-spacing: .04em; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 8px;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+  cursor: pointer; text-decoration: none;
+}
+
+.v-btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+/* Photo placeholder hero */
+.v-hero-visual { display: flex; align-items: flex-end; justify-content: center; }
+
+.v-hero-photo {
+  width: 100%; max-width: 460px;
+  aspect-ratio: 3/4;
+  border-radius: 32px;
+  background: #1a1a1a;
+  border: 1px solid rgba(201,169,110,.15);
+  overflow: hidden; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), var(--shadow-gold);
+}
+
+.v-photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem;
+  background: linear-gradient(160deg, #1a1a1a 0%, #222 60%, rgba(201,169,110,.05) 100%);
+}
+
+.v-photo-placeholder svg { color: rgba(201,169,110,.3); }
+.v-photo-label { font-size: .82rem; color: var(--muted-2); letter-spacing: .06em; text-transform: uppercase; }
+
+/* Badge flottant sur photo */
+.v-hero-badge {
+  position: absolute; bottom: 2rem; left: -1.5rem;
+  background: #111;
+  border: 1px solid rgba(201,169,110,.2);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  display: flex; align-items: center; gap: .8rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+
+.v-badge-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(201,169,110,.15);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+
+.v-badge-text strong { display: block; font-size: .92rem; font-weight: 600; color: #f5f0eb; }
+.v-badge-text span   { font-size: .78rem; color: var(--muted-v); }
+
+/* Scroll indicator */
+.v-hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  gap: .5rem; color: var(--muted-2);
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+}
+
+.v-scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(201,169,110,.4), transparent);
+  animation: scroll-line 2s ease infinite;
+}
+
+@keyframes scroll-line {
+  0%   { transform:scaleY(0); transform-origin:top; }
+  50%  { transform:scaleY(1); transform-origin:top; }
+  51%  { transform:scaleY(1); transform-origin:bottom; }
+  100% { transform:scaleY(0); transform-origin:bottom; }
+}
+
+/* Stats barre */
+.v-hero-stats {
+  position: relative; z-index: 1;
+  border-top: 1px solid rgba(255,255,255,.06);
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  padding: 2.5rem clamp(1.5rem, 6vw, 5rem);
+  display: flex; gap: 4rem; flex-wrap: wrap;
+}
+
+.v-stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem; font-weight: 700;
+  color: var(--gold); line-height: 1;
+}
+
+.v-stat-label {
+  font-size: .8rem; color: var(--muted-v);
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-top: .3rem;
+}
+
+/* ===================== SECTION BASE ===================== */
+.v-section {
+  padding: clamp(5rem, 10vw, 9rem) clamp(1.5rem, 6vw, 5rem);
+}
+
+.v-section.alt { background: #111111; }
+
+.v-container { max-width: 1200px; margin: 0 auto; }
+
+.v-label {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-size: .78rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.2rem;
+}
+
+.v-label::before {
+  content: ''; display: block;
+  width: 28px; height: 1px; background: var(--gold);
+}
+
+.v-h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; line-height: 1.2;
+  color: #f5f0eb; margin-bottom: .8rem;
+}
+
+.v-h2 em { font-style: italic; color: var(--gold); }
+
+.v-sub {
+  font-size: 1rem; color: var(--muted-v);
+  max-width: 540px; line-height: 1.7;
+}
+
+/* ===================== REVEAL ===================== */
+.v-reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity .65s cubic-bezier(.4,0,.2,1),
+              transform .65s cubic-bezier(.4,0,.2,1);
+}
+
+.v-reveal.visible { opacity: 1; transform: translateY(0); }
+.v-reveal.d1 { transition-delay: .1s; }
+.v-reveal.d2 { transition-delay: .2s; }
+.v-reveal.d3 { transition-delay: .3s; }
+.v-reveal.d4 { transition-delay: .4s; }
+
+/* ===================== SERVICES ===================== */
+.v-services-header {
+  display: flex; align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 3.5rem; gap: 2rem; flex-wrap: wrap;
+}
+
+.v-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5px;
+  background: rgba(255,255,255,.04);
+  border-radius: 20px; overflow: hidden;
+}
+
+.v-service-card {
+  background: #111;
+  padding: 2.5rem 2rem;
+  cursor: pointer;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+  text-decoration: none; color: inherit; display: block;
+}
+
+.v-service-card::before {
+  content: ''; position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.v-service-card:hover { background: #1a1a1a; transform: translateY(-2px); }
+.v-service-card:hover::before { transform: scaleX(1); }
+
+.v-service-photo {
+  width: 100%; aspect-ratio: 16/9;
+  border-radius: 14px; background: #222;
+  margin-bottom: 1.5rem; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.v-service-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.v-svc-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: .6rem;
+  background: linear-gradient(135deg, #222 0%, rgba(201,169,110,.06) 100%);
+}
+
+.v-svc-placeholder svg  { color: rgba(201,169,110,.4); }
+.v-svc-placeholder span { font-size: .7rem; color: var(--muted-2); letter-spacing: .08em; text-transform: uppercase; }
+
+.v-svc-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 600;
+  color: #f5f0eb; margin-bottom: .5rem;
+}
+
+.v-svc-desc {
+  font-size: .88rem; color: var(--muted-v);
+  line-height: 1.6; margin-bottom: 1.5rem;
+}
+
+.v-svc-footer {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem;
+}
+
+.v-svc-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700; color: var(--gold);
+}
+
+.v-svc-duration {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .78rem; color: var(--muted-v);
+}
+
+.v-svc-reserve {
+  display: inline-flex; align-items: center;
+  padding: .5rem 1.1rem;
+  background: rgba(201,169,110,.12);
+  color: var(--gold);
+  font-size: .8rem; font-weight: 600;
+  border-radius: 6px;
+  transition: all .22s; text-decoration: none;
+}
+
+.v-svc-reserve:hover { background: rgba(201,169,110,.22); }
+
+/* ===================== POURQUOI ===================== */
+.v-pourquoi-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5rem; align-items: center;
+}
+
+.v-main-photo {
+  width: 100%; aspect-ratio: 4/5;
+  border-radius: 32px; background: #1a1a1a;
+  border: 1px solid rgba(201,169,110,.12);
+  overflow: hidden; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.v-main-photo-inner {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem;
+  background: linear-gradient(160deg, #1a1a1a 0%, rgba(201,169,110,.04) 100%);
+}
+
+.v-small-photo {
+  position: absolute; bottom: -2rem; right: -2rem;
+  width: 45%; aspect-ratio: 1;
+  border-radius: 20px; background: #222;
+  border: 3px solid #0a0a0a;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.v-small-photo-inner {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: .6rem;
+  background: linear-gradient(135deg, #222, rgba(201,169,110,.05));
+}
+
+.v-feature-item {
+  display: flex; gap: 1.2rem; align-items: flex-start;
+  padding: 1.5rem; border-radius: 14px;
+  background: transparent; border: 1px solid transparent;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+}
+
+.v-feature-item:hover {
+  background: #1a1a1a;
+  border-color: rgba(201,169,110,.1);
+}
+
+.v-feature-icon {
+  width: 50px; height: 50px; border-radius: 10px;
+  background: rgba(201,169,110,.1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+
+.v-feature-h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 600;
+  color: #f5f0eb; margin-bottom: .4rem;
+}
+
+.v-feature-p {
+  font-size: .9rem; color: var(--muted-v); line-height: 1.65;
+}
+
+/* ===================== GALERIE ===================== */
+.v-galerie-header { text-align: center; margin-bottom: 3.5rem; }
+.v-galerie-header .v-label { justify-content: center; }
+.v-galerie-header .v-label::before { display: none; }
+.v-galerie-header .v-label::after { content: ''; display: block; width: 28px; height: 1px; background: var(--gold); }
+.v-galerie-header .v-sub { margin: 0 auto; text-align: center; }
+
+.v-galerie-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .8rem;
+}
+
+.v-galerie-item {
+  border-radius: 14px; overflow: hidden;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,.04);
+  cursor: pointer; transition: all .28s cubic-bezier(.4,0,.2,1);
+  position: relative; display: flex;
+  align-items: center; justify-content: center;
+}
+
+.v-galerie-item:hover { border-color: rgba(201,169,110,.25); transform: scale(1.02); z-index: 1; }
+.v-galerie-item:hover .v-galerie-overlay { opacity: 1; }
+
+.v-galerie-item:nth-child(1) { aspect-ratio:1; grid-row:span 2; }
+.v-galerie-item:nth-child(n+2) { aspect-ratio: 16/9; }
+
+.v-galerie-item img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.v-g-placeholder {
+  width: 100%; height: 100%; min-height: 160px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .7rem;
+}
+
+.v-g-placeholder svg { color: rgba(201,169,110,.25); }
+.v-g-placeholder span { font-size: .72rem; color: var(--muted-2); letter-spacing: .08em; text-transform: uppercase; }
+
+.v-galerie-overlay {
+  position: absolute; inset: 0;
+  background: rgba(201,169,110,.08);
+  opacity: 0; transition: opacity .25s;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.v-galerie-overlay svg { color: var(--gold); opacity: .8; }
+
+/* ===================== TÉMOIGNAGES ===================== */
+.v-temoignages-header { text-align: center; margin-bottom: 3.5rem; }
+.v-temoignages-header .v-label { justify-content: center; }
+.v-temoignages-header .v-label::before { display: none; }
+.v-temoignages-header .v-label::after { content: ''; display: block; width: 28px; height: 1px; background: var(--gold); }
+
+.v-temoignages-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+}
+
+.v-temoignage-card {
+  background: #111;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 20px; padding: 2rem;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+}
+
+.v-temoignage-card:hover {
+  border-color: rgba(201,169,110,.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+
+.v-stars { display: flex; gap: .3rem; margin-bottom: 1.2rem; }
+.v-star  { color: var(--gold); }
+
+.v-temoignage-text {
+  font-size: .95rem; color: var(--white-2);
+  line-height: 1.75; font-style: italic; margin-bottom: 1.5rem;
+}
+
+.v-temoignage-text::before {
+  content: '"';
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem; color: rgba(201,169,110,.2);
+  line-height: 0; vertical-align: -1.2rem; margin-right: .3rem;
+}
+
+.v-temoignage-author { display: flex; align-items: center; gap: .9rem; }
+
+.v-author-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(201,169,110,.12);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700; color: var(--gold); flex-shrink: 0;
+}
+
+.v-author-info strong { display: block; font-size: .92rem; font-weight: 600; color: #f5f0eb; }
+.v-author-info span   { font-size: .8rem; color: var(--muted-v); }
+
+/* ===================== CONTACT ===================== */
+.v-contact-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5rem; align-items: center;
+}
+
+.v-contact-item {
+  display: flex; gap: 1.2rem; align-items: flex-start;
+}
+
+.v-contact-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: rgba(201,169,110,.1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+
+.v-contact-detail strong { display: block; font-size: .95rem; font-weight: 600; color: #f5f0eb; margin-bottom: .3rem; }
+.v-contact-detail p, .v-contact-detail a { font-size: .9rem; color: var(--muted-v); transition: color .2s; }
+.v-contact-detail a:hover { color: var(--gold); }
+
+.v-horaires-card {
+  background: #1a1a1a;
+  border: 1px solid rgba(201,169,110,.12);
+  border-radius: 32px; padding: 2.5rem;
+  box-shadow: var(--shadow-gold);
+}
+
+.v-horaires-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 600; color: #f5f0eb;
+  margin-bottom: 1.8rem; padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.v-horaire-row {
+  display: flex; justify-content: space-between;
+  align-items: center; font-size: .92rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+.v-horaire-row:last-child { border-bottom: none; }
+.v-horaire-day  { color: var(--muted-v); }
+.v-horaire-time { font-weight: 600; color: #f5f0eb; }
+.v-horaire-row.closed .v-horaire-time { color: var(--muted-2); font-weight: 400; }
+
+.v-btn-whatsapp {
+  display: inline-flex; align-items: center; gap: .7rem;
+  padding: .85rem 1.6rem;
+  background: #25D366; color: #fff;
+  font-weight: 600; font-size: .9rem;
+  border-radius: 8px; transition: all .28s cubic-bezier(.4,0,.2,1);
+  cursor: pointer; text-decoration: none;
+}
+
+.v-btn-whatsapp:hover {
+  background: #1ebe5d;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(37,211,102,.25);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1024px) {
+  .v-hero-inner { grid-template-columns: 1fr; }
+  .v-hero-visual { display: none; }
+  .v-pourquoi-grid { grid-template-columns: 1fr; }
+  .v-pourquoi-visual { display: none; }
+  .v-contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+
+@media (max-width: 768px) {
+  .v-services-grid { grid-template-columns: 1fr 1fr; }
+  .v-galerie-grid { grid-template-columns: repeat(2,1fr); }
+  .v-galerie-item:nth-child(1) { grid-row: span 1; aspect-ratio: 1; }
+  .v-temoignages-grid { grid-template-columns: 1fr; }
+  .v-hero-stats { gap: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .v-services-grid { grid-template-columns: 1fr; }
+  .v-galerie-grid { grid-template-columns: 1fr; }
+  .v-hero-stats { flex-direction: column; gap: 1.5rem; }
+  .v-hero-actions { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-reveal { opacity:1; transform:none; transition:none; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-wrapper">
+<div class="vitrine-wrap">
 
-  <!-- HERO -->
-  <div class="hero-section reveal">
-    <div class="section-tag">✦ Salon de Coiffure</div>
-    <h1 class="page-title">Bienvenue chez <em>{{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}</em></h1>
-    <p class="page-subtitle" style="max-width:540px;">Choisissez votre coupe et réservez en quelques clics. Qualité, style et authenticité.</p>
-    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3rem;">
-      {% if current_user.is_authenticated and not current_user.is_admin() %}
-        <a href="{{ url_for('client.reserver') }}" class="btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Prendre rendez-vous
-        </a>
-      {% elif not current_user.is_authenticated %}
-        <a href="{{ url_for('auth.register') }}" class="btn-primary">Réserver maintenant</a>
-      {% endif %}
-      <a href="{{ url_for('client.profil_salon') }}" class="btn-secondary">Notre salon →</a>
-    </div>
-  </div>
+  <!-- ==================== HERO ==================== -->
+  <div class="v-hero">
+    <div class="v-hero-bg"></div>
+    <div class="v-hero-dots"></div>
 
-  <!-- SERVICES -->
-  <div class="section-header reveal" style="text-align:left; margin:0 0 2rem;">
-    <div class="section-tag">Ce qu'on fait</div>
-    <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.6rem,3vw,2.2rem); font-weight:700;">Nos Services</h2>
-  </div>
+    <div class="v-hero-inner">
+      <!-- Texte -->
+      <div class="v-hero-text">
+        <div class="v-hero-tag v-reveal">
+          <div class="v-tag-dot"></div>
+          Ouvert aujourd'hui — {{ profil_salon.horaires if profil_salon and profil_salon.horaires else '8h – 20h' }}
+        </div>
 
-  {% if services %}
-  <div class="services-grid">
-    {% for service in services %}
-    <div class="service-card reveal stagger-{{ loop.index if loop.index <= 5 else '' }}">
-      <div class="service-photo">
-        {% if service.photo %}
-          <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" alt="{{ service.nom }}">
-        {% else %}
-          ✂️
-        {% endif %}
-      </div>
-      <div class="service-body">
-        <div class="service-name">{{ service.nom }}</div>
-        {% if service.description %}
-        <div class="service-desc">{{ service.description }}</div>
-        {% endif %}
-        <div class="service-footer">
-          <span class="price-badge">{{ service.prix|int }} FCFA</span>
-          <span style="font-size:.8rem; color:var(--text-muted);">⏱ {{ service.duree_minutes }} min</span>
+        <h1 class="v-hero-h1 v-reveal d1">
+          <span>L'art de la</span>
+          <span class="accent">coiffure</span>
+          <span>à votre service</span>
+        </h1>
+
+        <p class="v-hero-p v-reveal d2">
+          {{ profil_salon.bio if profil_salon and profil_salon.bio else 'Coupes, dégradés, tresses et soins capillaires — réalisés avec soin, expertise et passion. Votre style, notre signature.' }}
+        </p>
+
+        <div class="v-hero-actions v-reveal d3">
           {% if current_user.is_authenticated and not current_user.is_admin() %}
-            <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}" class="btn-primary" style="padding:.5rem 1rem; font-size:.82rem;">Réserver</a>
+            <a href="{{ url_for('client.reserver') }}" class="v-btn-gold">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Prendre rendez-vous
+            </a>
           {% elif not current_user.is_authenticated %}
-            <a href="{{ url_for('auth.register') }}" class="btn-secondary" style="padding:.5rem 1rem; font-size:.82rem;">Réserver</a>
+            <a href="{{ url_for('auth.register') }}" class="v-btn-gold">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Réserver maintenant
+            </a>
           {% endif %}
+          <a href="{{ url_for('client.profil_salon') }}" class="v-btn-ghost">
+            Notre salon
+          </a>
+        </div>
+      </div>
+
+      <!-- Visuel -->
+      <div class="v-hero-visual">
+        <div class="v-hero-photo">
+          {% if profil_salon and profil_salon.photo_profil %}
+            <img src="{{ url_for('static', filename='uploads/' + profil_salon.photo_profil) }}"
+                 alt="Photo du salon {{ profil_salon.nom_salon }}"
+                 style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+            <div class="v-photo-placeholder">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <circle cx="12" cy="10" r="3"/>
+                <path d="M6 21v-1a6 6 0 0 1 12 0v1"/>
+              </svg>
+              <span class="v-photo-label">Photo du coiffeur</span>
+            </div>
+          {% endif %}
+
+          <div class="v-hero-badge">
+            <div class="v-badge-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div class="v-badge-text">
+              <strong>4.9 / 5</strong>
+              <span>Avis clients</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div style="text-align:center; padding:4rem 0; color:var(--text-muted);">
-    <div style="font-size:3rem; margin-bottom:1rem; opacity:.3;">✂️</div>
-    <p>Aucun service disponible pour le moment.</p>
-  </div>
-  {% endif %}
 
-  <!-- INFO CARDS -->
-  <div class="info-grid">
-    <div class="card info-card reveal stagger-1">
-      <div class="info-icon">🕐</div>
-      <h4>Horaires</h4>
-      <p>{{ profil_salon.horaires if profil_salon and profil_salon.horaires else 'Lun – Sam : 8h – 20h' }}</p>
+    <!-- Stats -->
+    <div class="v-hero-stats">
+      <div class="v-reveal">
+        <div class="v-stat-number" data-count="500">0+</div>
+        <div class="v-stat-label">Clients satisfaits</div>
+      </div>
+      <div class="v-reveal d1">
+        <div class="v-stat-number" data-count="5">0+</div>
+        <div class="v-stat-label">Années d'expérience</div>
+      </div>
+      <div class="v-reveal d2">
+        <div class="v-stat-number">{{ services|length if services else '4' }}+</div>
+        <div class="v-stat-label">Services proposés</div>
+      </div>
+      <div class="v-reveal d3">
+        <div class="v-stat-number">100%</div>
+        <div class="v-stat-label">Satisfaction garantie</div>
+      </div>
     </div>
-    <div class="card info-card reveal stagger-2">
-      <div class="info-icon">📍</div>
-      <h4>Adresse</h4>
-      <p>{{ profil_salon.adresse if profil_salon and profil_salon.adresse else 'Lomé, Togo' }}</p>
+
+    <div class="v-hero-scroll">
+      <div class="v-scroll-line"></div>
+      <span>Découvrir</span>
     </div>
-    <div class="card info-card reveal stagger-3">
-      <div class="info-icon">💬</div>
-      <h4>Contact rapide</h4>
-      <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}" target="_blank">
-        {{ profil_salon.whatsapp if profil_salon and profil_salon.whatsapp else '+228 90 00 00 00' }}
-      </a>
+  </div>
+
+  <!-- ==================== SERVICES ==================== -->
+  <div class="v-section alt" id="services">
+    <div class="v-container">
+
+      <div class="v-services-header">
+        <div class="v-reveal">
+          <div class="v-label">Prestations</div>
+          <h2 class="v-h2">Nos <em>services</em></h2>
+        </div>
+        <p class="v-sub v-reveal d1" style="margin-bottom:0;">
+          Des prestations soignées pour chaque style — du classique au créatif.
+        </p>
+      </div>
+
+      {% if services %}
+      <div class="v-services-grid">
+        {% for service in services %}
+        <div class="v-service-card v-reveal {% if loop.index == 2 %}d1{% elif loop.index == 3 %}d2{% elif loop.index == 4 %}d3{% endif %}">
+          <div class="v-service-photo">
+            {% if service.photo %}
+              <img src="{{ url_for('static', filename='uploads/' + service.photo) }}" alt="{{ service.nom }}">
+            {% else %}
+              <div class="v-svc-placeholder">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                  <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+                  <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+                  <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+                  <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+                </svg>
+                <span>Photo à venir</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="v-svc-name">{{ service.nom }}</div>
+          {% if service.description %}
+          <div class="v-svc-desc">{{ service.description }}</div>
+          {% endif %}
+
+          <div class="v-svc-footer">
+            <div class="v-svc-price">{{ service.prix|int }} FCFA</div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <div class="v-svc-duration">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ service.duree_minutes }} min
+              </div>
+              {% if current_user.is_authenticated and not current_user.is_admin() %}
+                <a href="{{ url_for('client.reserver') }}?service_id={{ service.id }}" class="v-svc-reserve">Réserver</a>
+              {% elif not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="v-svc-reserve">Réserver</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:4rem 0;color:var(--muted-v);">
+        <p>Aucun service disponible pour le moment.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- ==================== POURQUOI NOUS ==================== -->
+  <div class="v-section" id="pourquoi">
+    <div class="v-container">
+      <div class="v-pourquoi-grid">
+
+        <!-- Visuel gauche -->
+        <div class="v-pourquoi-visual v-reveal">
+          <div class="v-main-photo" style="position:relative;">
+            {% if profil_salon and profil_salon.photo_profil %}
+              <img src="{{ url_for('static', filename='uploads/' + profil_salon.photo_profil) }}"
+                   alt="Ambiance salon"
+                   style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+              <div class="v-main-photo-inner">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" style="color:rgba(201,169,110,.3)">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span style="font-size:.75rem;color:var(--muted-2);letter-spacing:.08em;text-transform:uppercase;">Ambiance salon</span>
+              </div>
+            {% endif %}
+            <div class="v-small-photo">
+              <div class="v-small-photo-inner">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:rgba(201,169,110,.3)">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span style="font-size:.65rem;color:var(--muted-2);letter-spacing:.06em;text-transform:uppercase;">Équipe</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features droite -->
+        <div>
+          <div class="v-reveal">
+            <div class="v-label">Pourquoi nous</div>
+            <h2 class="v-h2">Un salon pensé <em>pour vous</em></h2>
+            <p class="v-sub" style="margin-bottom:2.5rem;">Chaque détail est pensé pour vous offrir une expérience unique — du premier contact à la dernière touche.</p>
+          </div>
+
+          <div class="v-feature-item v-reveal d1">
+            <div class="v-feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="v-feature-h4">Expertise & Précision</div>
+              <p class="v-feature-p">Formés aux dernières tendances et techniques, nos coiffeurs maîtrisent chaque type de cheveu pour un résultat impeccable.</p>
+            </div>
+          </div>
+
+          <div class="v-feature-item v-reveal d2">
+            <div class="v-feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="v-feature-h4">Produits de Qualité</div>
+              <p class="v-feature-p">Nous utilisons uniquement des produits capillaires premium, sélectionnés pour leur efficacité et leur respect de vos cheveux.</p>
+            </div>
+          </div>
+
+          <div class="v-feature-item v-reveal d3">
+            <div class="v-feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div>
+              <div class="v-feature-h4">Cadre Confortable</div>
+              <p class="v-feature-p">Un espace soigné, une atmosphère détendue et un accueil chaleureux — parce que vous méritez plus qu'une simple coupe.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GALERIE ==================== -->
+  <div class="v-section alt" id="galerie">
+    <div class="v-container">
+      <div class="v-galerie-header">
+        <div class="v-label v-reveal">Réalisations</div>
+        <h2 class="v-h2 v-reveal d1">Notre <em>galerie</em></h2>
+        <p class="v-sub v-reveal d2">Quelques-unes de nos plus belles réalisations — chaque photo raconte une histoire.</p>
+      </div>
+
+      <div class="v-galerie-grid">
+        {% set gallery_photos = profil_salon.photos_interieur.limit(6).all() if profil_salon else [] %}
+        {% if gallery_photos %}
+          {% for photo in gallery_photos %}
+          <div class="v-galerie-item v-reveal">
+            <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
+                 alt="{{ photo.legende or 'Photo du salon' }}"
+                 loading="lazy">
+            <div class="v-galerie-overlay">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          {% endfor %}
+          {% for i in range(6 - gallery_photos|length) %}
+          <div class="v-galerie-item v-reveal d{{ loop.index }}">
+            <div class="v-g-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Photo à venir</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          {% for i in range(6) %}
+          <div class="v-galerie-item v-reveal {% if i == 1 %}d1{% elif i == 2 %}d2{% elif i == 3 %}d1{% elif i == 4 %}d2{% elif i == 5 %}d3{% endif %}">
+            <div class="v-g-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Photo à venir</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TÉMOIGNAGES ==================== -->
+  <div class="v-section" id="temoignages">
+    <div class="v-container">
+      <div class="v-temoignages-header">
+        <div class="v-label v-reveal">Avis clients</div>
+        <h2 class="v-h2 v-reveal d1">Ce qu'ils <em>disent</em></h2>
+      </div>
+
+      <div class="v-temoignages-grid">
+
+        <div class="v-temoignage-card v-reveal">
+          <div class="v-stars">
+            {% for _ in range(5) %}
+            <svg class="v-star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+          </div>
+          <p class="v-temoignage-text">Le meilleur salon que j'ai fréquenté à Lomé. Le coiffeur a parfaitement compris ce que je voulais, le résultat est au-delà de mes attentes. Je recommande vivement !</p>
+          <div class="v-temoignage-author">
+            <div class="v-author-avatar">K</div>
+            <div class="v-author-info">
+              <strong>Kofi A.</strong>
+              <span>Client régulier</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-temoignage-card v-reveal d1">
+          <div class="v-stars">
+            {% for _ in range(5) %}
+            <svg class="v-star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+          </div>
+          <p class="v-temoignage-text">J'adore la possibilité de réserver en ligne — c'est tellement pratique. Et les tresses qu'on m'a faites ont duré plus de 3 semaines. Un vrai pro !</p>
+          <div class="v-temoignage-author">
+            <div class="v-author-avatar">A</div>
+            <div class="v-author-info">
+              <strong>Ama S.</strong>
+              <span>Cliente fidèle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-temoignage-card v-reveal d2">
+          <div class="v-stars">
+            {% for _ in range(5) %}
+            <svg class="v-star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+          </div>
+          <p class="v-temoignage-text">Cadre propre, accueil super sympa et dégradé nickel. Je suis venu une première fois par curiosité, maintenant c'est mon salon attitré. Allez-y les yeux fermés.</p>
+          <div class="v-temoignage-author">
+            <div class="v-author-avatar">E</div>
+            <div class="v-author-info">
+              <strong>Edem K.</strong>
+              <span>Client depuis 2024</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CONTACT ==================== -->
+  <div class="v-section alt" id="contact">
+    <div class="v-container">
+      <div class="v-contact-grid">
+
+        <div>
+          <div class="v-label v-reveal">Nous trouver</div>
+          <h2 class="v-h2 v-reveal d1">Venez nous <em>rendre visite</em></h2>
+          <p class="v-sub v-reveal d2" style="margin-bottom:2.5rem;">Réservez en ligne ou passez directement. Nous sommes là pour vous accueillir.</p>
+
+          <div style="display:flex;flex-direction:column;gap:1.8rem;">
+            <div class="v-contact-item v-reveal d1">
+              <div class="v-contact-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="v-contact-detail">
+                <strong>Adresse</strong>
+                <p>{{ profil_salon.adresse if profil_salon and profil_salon.adresse else 'Lomé, Togo' }}</p>
+              </div>
+            </div>
+
+            <div class="v-contact-item v-reveal d2">
+              <div class="v-contact-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.59 1.25h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.79-.79a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2z"/>
+                </svg>
+              </div>
+              <div class="v-contact-detail">
+                <strong>Téléphone / WhatsApp</strong>
+                <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}">
+                  {{ profil_salon.whatsapp if profil_salon and profil_salon.whatsapp else '+228 90 00 00 00' }}
+                </a>
+              </div>
+            </div>
+
+            <div class="v-contact-item v-reveal d3">
+              <div class="v-contact-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="v-contact-detail">
+                <strong>Horaires d'ouverture</strong>
+                <p>{{ profil_salon.horaires if profil_salon and profil_salon.horaires else 'Lun – Sam : 8h – 20h' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2.5rem;" class="v-reveal d2">
+            <a href="https://wa.me/{{ (profil_salon.whatsapp or '22890000000') | replace('+','') | replace(' ','') }}"
+               target="_blank" class="v-btn-whatsapp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              WhatsApp
+            </a>
+            {% if current_user.is_authenticated and not current_user.is_admin() %}
+              <a href="{{ url_for('client.reserver') }}" class="v-btn-gold">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Réserver en ligne
+              </a>
+            {% elif not current_user.is_authenticated %}
+              <a href="{{ url_for('auth.register') }}" class="v-btn-gold">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Réserver en ligne
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Carte horaires -->
+        <div class="v-reveal d2">
+          <div class="v-horaires-card">
+            <div class="v-horaires-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:inline;vertical-align:middle;margin-right:.5rem;color:var(--gold)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Horaires d'ouverture
+            </div>
+            <div>
+              {% set jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'] %}
+              {% for jour in jours %}
+              <div class="v-horaire-row">
+                <span class="v-horaire-day">{{ jour }}</span>
+                <span class="v-horaire-time">8h00 – 20h00</span>
+              </div>
+              {% endfor %}
+              <div class="v-horaire-row closed">
+                <span class="v-horaire-day">Dimanche</span>
+                <span class="v-horaire-time">Fermé</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// --- Scroll reveal (IntersectionObserver) ---
+const vReveals = document.querySelectorAll('.v-reveal');
+const vObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      vObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+vReveals.forEach(el => vObserver.observe(el));
+
+// --- Counter animation (stats héro) ---
+const vCounters = document.querySelectorAll('.v-stat-number[data-count]');
+const vCounterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const target = parseInt(entry.target.dataset.count);
+      const suffix = entry.target.dataset.count === '100' ? '%' : '+';
+      let current = 0;
+      const step = Math.ceil(target / 40);
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        entry.target.textContent = current + suffix;
+        if (current >= target) clearInterval(timer);
+      }, 40);
+      vCounterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+vCounters.forEach(el => vCounterObserver.observe(el));
+</script>
 {% endblock %}

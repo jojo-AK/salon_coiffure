@@ -5,6 +5,10 @@ import os
 app = create_app('development')
 
 with app.app_context():
+    confirm = input("⚠ ATTENTION : seed.py efface TOUTES les données. Taper 'oui' pour confirmer : ")
+    if confirm.strip().lower() != 'oui':
+        print("Annulé.")
+        exit()
     db.drop_all()
     db.create_all()
 

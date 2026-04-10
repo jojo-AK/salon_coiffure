@@ -9,8 +9,10 @@ client_bp = Blueprint('client', __name__)
 
 @client_bp.route('/')
 def vitrine():
+    from app.models import ProfilSalon
     services = Service.query.filter_by(actif=True).order_by(Service.nom).all()
-    return render_template('client/vitrine.html', services=services)
+    profil_salon = ProfilSalon.get()
+    return render_template('client/vitrine.html', services=services, profil_salon=profil_salon)
 
 
 @client_bp.route('/salon')
