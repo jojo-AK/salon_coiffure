@@ -15,11 +15,7 @@
   <h1>{{ profil.nom_salon or 'MonSalon' }}</h1>
   <p>{{ profil.bio or 'Votre coiffeur de confiance' }}</p>
   <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1.5rem; position:relative; z-index:1;">
-    {% if current_user.is_authenticated and not current_user.is_admin() %}
-      <a href="{{ url_for('client.reserver') }}" class="btn-primary">Réserver maintenant</a>
-    {% elif not current_user.is_authenticated %}
-      <a href="{{ url_for('auth.register') }}" class="btn-primary">Réserver maintenant</a>
-    {% endif %}
+    <a href="{{ url_for('client.reserver') }}" class="btn-primary">Réserver maintenant</a>
     <a href="https://wa.me/{{ profil.whatsapp | replace('+','') | replace(' ','') if profil.whatsapp else '22890000000' }}"
        class="btn-secondary" target="_blank">WhatsApp</a>
   </div>

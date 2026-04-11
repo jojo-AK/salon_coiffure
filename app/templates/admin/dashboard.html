@@ -49,8 +49,8 @@
           <span style="font-size:.82rem; color:var(--text-muted);">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
         </div>
         <div class="rdv-meta">
-          <div class="rdv-meta-item">👤 {{ rdv.client.nom }} — {{ rdv.client.email }}</div>
-          {% if rdv.client.telephone %}<div class="rdv-meta-item">📞 <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.client.telephone }}</a></div>{% endif %}
+          <div class="rdv-meta-item">👤 {{ rdv.nom_client }}{% if rdv.email_client %} — {{ rdv.email_client }}{% endif %}</div>
+          <div class="rdv-meta-item">📞 <a href="tel:{{ rdv.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.telephone }}</a></div>
           <div class="rdv-meta-item">🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</div>
           <div class="rdv-meta-item" style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</div>
         </div>
@@ -91,7 +91,7 @@
         <div class="planning-body">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:.5rem; margin-bottom:.4rem;">
             <div>
-              <strong>{{ rdv.client.nom }}</strong>
+              <strong>{{ rdv.nom_client }}</strong>
               <span style="color:var(--text-muted); margin:0 .4rem;">·</span>
               <span>{{ rdv.service.nom }}</span>
               {% if rdv.liste_supplements %}
@@ -113,8 +113,8 @@
           <div style="display:flex; flex-wrap:wrap; gap:1.2rem; font-size:.82rem; color:var(--text-muted); margin-bottom:.6rem;">
             <span>🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</span>
             <span style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</span>
-            <span>{{ rdv.client.email }}</span>
-            {% if rdv.client.telephone %}<a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">📞 {{ rdv.client.telephone }}</a>{% endif %}
+            <a href="tel:{{ rdv.telephone | replace(' ','') }}" style="color:var(--text-muted);">📞 {{ rdv.telephone }}</a>
+            {% if rdv.email_client %}<span>{{ rdv.email_client }}</span>{% endif %}
             {% if rdv.note_client %}<span style="font-style:italic;">💬 {{ rdv.note_client }}</span>{% endif %}
           </div>
           {% if rdv.statut == 'en_attente' %}
@@ -165,8 +165,8 @@
         <span style="font-size:.82rem; color:var(--text-muted);">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span>
       </div>
       <div class="rdv-meta">
-        <div class="rdv-meta-item">👤 {{ rdv.client.nom }} — {{ rdv.client.email }}</div>
-        {% if rdv.client.telephone %}<div class="rdv-meta-item">📞 <a href="tel:{{ rdv.client.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.client.telephone }}</a></div>{% endif %}
+        <div class="rdv-meta-item">👤 {{ rdv.nom_client }}{% if rdv.email_client %} — {{ rdv.email_client }}{% endif %}</div>
+        <div class="rdv-meta-item">📞 <a href="tel:{{ rdv.telephone | replace(' ','') }}" style="color:var(--text-muted);">{{ rdv.telephone }}</a></div>
         <div class="rdv-meta-item">🕐 {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</div>
         {% if rdv.liste_supplements %}<div class="rdv-meta-item">➕ {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}</div>{% endif %}
         <div class="rdv-meta-item" style="color:var(--accent); font-weight:600;">{{ rdv.prix_total|int }} FCFA</div>

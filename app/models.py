@@ -15,8 +15,6 @@ class User(UserMixin, db.Model):
     mot_de_passe = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='client')
     created_at = db.Column(db.DateTime, default=datetime.now)
-    rendezvous = db.relationship(
-        'RendezVous', backref='client', lazy='dynamic')
 
     def set_password(self, password):
         self.mot_de_passe = generate_password_hash(password)
@@ -54,7 +52,10 @@ class Supplement(db.Model):
 class RendezVous(db.Model):
     __tablename__ = 'rendezvous'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # Guest fields (no account needed)
+    nom_client = db.Column(db.String(100), nullable=False)
+    telephone = db.Column(db.String(20), nullable=False)
+    email_client = db.Column(db.String(150), nullable=True)
     service_id = db.Column(db.Integer, db.ForeignKey(
         'services.id'), nullable=False)
     debut_datetime = db.Column(db.DateTime, nullable=False)

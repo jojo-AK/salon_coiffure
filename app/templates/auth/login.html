@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="auth-card">
-  <h2>Connexion</h2>
-  <p class="auth-sub">Accédez à votre espace client</p>
+  <h2>Administration</h2>
+  <p class="auth-sub">Espace réservé au coiffeur</p>
 
   <form method="POST">
     <div class="form-group">
@@ -25,8 +25,7 @@
   </form>
 
   <div style="text-align:center; margin-top:1.5rem; font-size:.88rem; color:var(--text-muted);">
-    Pas encore de compte ?
-    <a href="{{ url_for('auth.register') }}" style="color:var(--accent); font-weight:600;">S'inscrire</a>
+    <a href="{{ url_for('client.vitrine') }}" style="color:var(--accent);">← Retour au site</a>
   </div>
 </div>
 {% endblock %}

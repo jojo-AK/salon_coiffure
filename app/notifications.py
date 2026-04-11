@@ -14,18 +14,20 @@ def notifier_coiffeur_nouvelle_demande(rdv):
     Flash message immédiat + email si configuré.
     """
     flash(
-        f'Nouvelle demande de {rdv.client.nom} pour "{rdv.service.nom}" '
+        f'Nouvelle demande de {rdv.nom_client} ({rdv.telephone}) pour "{rdv.service.nom}" '
         f'le {rdv.debut_datetime.strftime("%d/%m/%Y à %H:%M")}.',
         'info'
     )
     _envoyer_email_optionnel(
-        sujet=f'[MonSalon] Nouvelle demande — {rdv.client.nom}',
+        sujet=f'[MonSalon] Nouvelle demande — {rdv.nom_client}',
         corps=f"""
 Bonjour,
 
 Une nouvelle demande de rendez-vous vient d'arriver :
 
-- Client  : {rdv.client.nom} ({rdv.client.email})
+- Client  : {rdv.nom_client}
+- Tel     : {rdv.telephone}
+- Email   : {rdv.email_client or 'non renseigné'}
 - Service : {rdv.service.nom}
 - Date    : {rdv.debut_datetime.strftime("%d/%m/%Y à %H:%M")}
 - Durée   : {rdv.duree_minutes} min
@@ -37,12 +39,14 @@ Connectez-vous au dashboard pour accepter ou refuser.
 
 
 def notifier_client_confirmation(rdv):
-    """Notifie le client que son RDV a été accepté."""
+    """Notifie le client que son RDV a été accepté (par email si disponible)."""
+    if not rdv.email_client:
+        return
     _envoyer_email_optionnel(
-        destinataire=rdv.client.email,
+        destinataire=rdv.email_client,
         sujet='[MonSalon] Rendez-vous confirmé !',
         corps=f"""
-Bonjour {rdv.client.nom},
+Bonjour {rdv.nom_client},
 
 Votre rendez-vous a été confirmé :
 
@@ -56,12 +60,14 @@ Votre rendez-vous a été confirmé :
 
 
 def notifier_client_refus(rdv):
-    """Notifie le client que son RDV a été refusé."""
+    """Notifie le client que son RDV a été refusé (par email si disponible)."""
+    if not rdv.email_client:
+        return
     _envoyer_email_optionnel(
-        destinataire=rdv.client.email,
+        destinataire=rdv.email_client,
         sujet='[MonSalon] Rendez-vous non disponible',
         corps=f"""
-Bonjour {rdv.client.nom},
+Bonjour {rdv.nom_client},
 
 Nous sommes désolés, votre demande pour "{rdv.service.nom}"
 le {rdv.debut_datetime.strftime("%d/%m/%Y à %H:%M")} n'a pas pu être acceptée.
@@ -80,7 +86,7 @@ def _envoyer_email_optionnel(sujet, corps, destinataire=None):
     """
     from flask import current_app
     if not current_app.config.get('MAIL_USERNAME'):
-        return  # Email non configuré → on skip silencieusement
+        return
 
     try:
         msg = Message(

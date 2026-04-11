@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Suivi de réservation – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:700px;">
+
+  <h1 class="page-title">Suivre mes <em>rendez-vous</em></h1>
+  <p class="page-subtitle">Entrez votre numéro de téléphone pour retrouver vos réservations.</p>
+
+  <!-- SEARCH FORM -->
+  <form method="POST" style="display:flex; gap:.8rem; margin-bottom:2.5rem; flex-wrap:wrap;">
+    <div class="form-group" style="flex:1; min-width:200px; margin-bottom:0;">
+      <input type="tel" name="telephone" value="{{ telephone }}" placeholder="Votre numéro de téléphone" required style="width:100%;"/>
+    </div>
+    <button type="submit" class="btn-primary" style="white-space:nowrap;">Rechercher</button>
+  </form>
+
+  {% if telephone %}
+    {% if rendezvous %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.2rem;">
+      {% for rdv in rendezvous %}
+      <div class="rdv-card reveal">
+        <div class="rdv-card-header">
+          <div class="rdv-card-title">{{ rdv.service.nom }}</div>
+          {% if rdv.statut == 'en_attente' %}
+            <span class="badge-statut badge-attente">En attente</span>
+          {% elif rdv.statut == 'accepte' %}
+            <span class="badge-statut badge-accepte">Confirmé</span>
+          {% elif rdv.statut == 'annulation_demandee' %}
+            <span class="badge-statut badge-annul-dem">Annulation demandée</span>
+          {% elif rdv.statut == 'annule' %}
+            <span class="badge-statut badge-annule">Annulé</span>
+          {% elif rdv.statut == 'termine' %}
+            <span class="badge-statut badge-termine">Terminé</span>
+          {% else %}
+            <span class="badge-statut badge-refuse">Refusé</span>
+          {% endif %}
+        </div>
+
+        <div class="rdv-meta">
+          <div class="rdv-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ rdv.debut_datetime.strftime('%d/%m/%Y') }}
+          </div>
+          <div class="rdv-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }} ({{ rdv.duree_minutes }} min)
+          </div>
+          {% if rdv.liste_supplements %}
+          <div class="rdv-meta-item">
+            {{ rdv.liste_supplements | map(attribute='nom') | join(', ') }}
+          </div>
+          {% endif %}
+          <div class="rdv-meta-item" style="color:var(--accent); font-weight:600;">
+            {{ rdv.prix_total|int }} FCFA
+          </div>
+        </div>
+
+        {% if rdv.statut == 'annulation_demandee' %}
+        <div class="flash flash-info" style="font-size:.82rem; margin-top:.5rem;">
+          <span>Annulation en attente de confirmation du coiffeur</span>
+        </div>
+        {% elif rdv.statut in ['en_attente', 'accepte'] and rdv.debut_datetime > now %}
+        <form method="POST" action="{{ url_for('client.annuler_rdv', rdv_id=rdv.id) }}"
+          onsubmit="return confirm('Confirmer la demande d\'annulation ?')" style="margin-top:.8rem;">
+          <input type="hidden" name="telephone" value="{{ telephone }}"/>
+          <button type="submit" class="btn-secondary" style="width:100%; justify-content:center; border-color:rgba(239,68,68,.3); color:#f87171;">
+            Demander l'annulation
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center; padding:3rem 0;">
+      <div style="font-size:2.5rem; opacity:.2; margin-bottom:.8rem;">📱</div>
+      <p style="color:var(--text-muted);">Aucun rendez-vous trouvé pour ce numéro.</p>
+    </div>
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}

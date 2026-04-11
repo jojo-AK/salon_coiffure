@@ -207,7 +207,7 @@ def accepter_rdv(rdv_id):
     rdv.statut = 'accepte'
     db.session.commit()
     notifier_client_confirmation(rdv)
-    flash(f'Rendez-vous de {rdv.client.nom} accepte.', 'success')
+    flash(f'Rendez-vous de {rdv.nom_client} accepte.', 'success')
     return redirect(url_for('admin.dashboard'))
 
 
@@ -219,7 +219,7 @@ def refuser_rdv(rdv_id):
     rdv.statut = 'refuse'
     db.session.commit()
     notifier_client_refus(rdv)
-    flash(f'Rendez-vous de {rdv.client.nom} refuse.', 'info')
+    flash(f'Rendez-vous de {rdv.nom_client} refuse.', 'info')
     return redirect(url_for('admin.dashboard'))
 
 
@@ -233,7 +233,7 @@ def terminer_rdv(rdv_id):
         return redirect(url_for('admin.dashboard'))
     rdv.statut = 'termine'
     db.session.commit()
-    flash(f'RDV de {rdv.client.nom} marque comme termine.', 'success')
+    flash(f'RDV de {rdv.nom_client} marque comme termine.', 'success')
     return redirect(url_for('admin.dashboard'))
 
 
@@ -245,7 +245,7 @@ def confirmer_annulation(rdv_id):
     rdv.statut = 'annule'
     db.session.commit()
     flash(
-        f'Annulation de {rdv.client.nom} confirmee. Creneau libere.', 'success')
+        f'Annulation de {rdv.nom_client} confirmee. Creneau libere.', 'success')
     return redirect(url_for('admin.dashboard'))
 
 
@@ -257,7 +257,7 @@ def refuser_annulation(rdv_id):
     rdv.statut = 'accepte'
     db.session.commit()
     flash(
-        f'Demande d\'annulation de {rdv.client.nom} refusee. RDV maintenu.', 'info')
+        f'Demande d\'annulation de {rdv.nom_client} refusee. RDV maintenu.', 'info')
     return redirect(url_for('admin.dashboard'))
 
 

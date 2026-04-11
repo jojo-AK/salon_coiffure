@@ -5,7 +5,7 @@ import os
 app = create_app('development')
 
 with app.app_context():
-    confirm = input("⚠ ATTENTION : seed.py efface TOUTES les données. Taper 'oui' pour confirmer : ")
+    confirm = input("ATTENTION : seed.py efface TOUTES les donnees. Taper 'oui' pour confirmer : ")
     if confirm.strip().lower() != 'oui':
         print("Annulé.")
         exit()
@@ -16,11 +16,6 @@ with app.app_context():
     coiffeur = User(nom='Joseph Coiffeur', email='coiffeur@salon.com', role='coiffeur')
     coiffeur.set_password('coiffeur123')
     db.session.add(coiffeur)
-
-    # Client test
-    client = User(nom='Client Test', email='client@test.com', telephone='+228 90 12 34 56', role='client')
-    client.set_password('client123')
-    db.session.add(client)
 
     # Services
     services = [
@@ -44,6 +39,6 @@ with app.app_context():
 
     db.session.commit()
     print("Base initialisee !")
-    print("  Coiffeur : coiffeur@salon.com / coiffeur123")
-    print("  Client   : client@test.com / client123")
+    print("  Admin : coiffeur@salon.com / coiffeur123")
     print("  4 services + 4 supplements crees")
+    print("  Les clients n'ont plus besoin de compte !")

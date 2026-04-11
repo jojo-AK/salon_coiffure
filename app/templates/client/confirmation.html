@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Demande envoyée – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:600px; text-align:center; padding-top:4rem;">
+
+  <div style="font-size:4rem; margin-bottom:1rem;">✓</div>
+
+  <h1 class="page-title">Demande <em>envoyée</em> !</h1>
+  <p class="page-subtitle" style="margin-bottom:2rem;">
+    Merci <strong>{{ rdv.nom_client }}</strong>, votre demande de rendez-vous a bien été enregistrée.
+  </p>
+
+  <div class="conf-card" style="text-align:left;">
+    <div class="conf-row"><span class="conf-label">Service</span><span class="conf-value">{{ rdv.service.nom }}</span></div>
+    <div class="conf-row"><span class="conf-label">Date</span><span class="conf-value">{{ rdv.debut_datetime.strftime('%d/%m/%Y') }}</span></div>
+    <div class="conf-row"><span class="conf-label">Heure</span><span class="conf-value">{{ rdv.debut_datetime.strftime('%H:%M') }} → {{ rdv.fin_datetime.strftime('%H:%M') }}</span></div>
+    <div class="conf-row"><span class="conf-label">Statut</span><span class="badge-statut badge-attente">En attente de confirmation</span></div>
+    <div class="conf-row" style="padding-top:.8rem;">
+      <span style="font-weight:700;">Total</span>
+      <span class="price-badge" style="font-size:1.1rem;">{{ rdv.prix_total|int }} FCFA</span>
+    </div>
+  </div>
+
+  <p style="color:var(--text-muted); font-size:.88rem; margin-top:1.5rem;">
+    Le coiffeur va confirmer votre rendez-vous. Vous pouvez suivre le statut de votre réservation à tout moment.
+  </p>
+
+  <div style="display:flex; gap:1rem; justify-content:center; margin-top:2rem; flex-wrap:wrap;">
+    <a href="{{ url_for('client.suivi') }}" class="btn-primary">Suivre mes RDV</a>
+    <a href="{{ url_for('client.vitrine') }}" class="btn-secondary">Retour à l'accueil</a>
+  </div>
+
+</div>
+{% endblock %}

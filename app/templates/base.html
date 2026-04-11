@@ -23,29 +23,21 @@
   <ul class="nav-links">
     <li><a href="{{ url_for('client.vitrine') }}" {% if request.endpoint == 'client.vitrine' %}class="active"{% endif %}>Accueil</a></li>
     <li><a href="{{ url_for('client.profil_salon') }}" {% if request.endpoint == 'client.profil_salon' %}class="active"{% endif %}>Notre salon</a></li>
+    <li><a href="{{ url_for('client.reserver') }}" {% if request.endpoint == 'client.reserver' %}class="active"{% endif %}>Réserver</a></li>
+    <li><a href="{{ url_for('client.suivi') }}" {% if request.endpoint == 'client.suivi' %}class="active"{% endif %}>Suivi RDV</a></li>
 
-    {% if current_user.is_authenticated %}
-      {% if current_user.is_admin() %}
-        <li><a href="{{ url_for('admin.dashboard') }}" {% if 'admin' in request.endpoint %}class="active"{% endif %}>Dashboard</a></li>
-        <li><a href="{{ url_for('admin.services') }}" {% if request.endpoint == 'admin.services' %}class="active"{% endif %}>Services</a></li>
-        <li><a href="{{ url_for('admin.supplements') }}" {% if request.endpoint == 'admin.supplements' %}class="active"{% endif %}>Suppléments</a></li>
-      {% else %}
-        <li><a href="{{ url_for('client.reserver') }}" {% if request.endpoint == 'client.reserver' %}class="active"{% endif %}>Réserver</a></li>
-        <li><a href="{{ url_for('client.mes_rendezvous') }}" {% if request.endpoint == 'client.mes_rendezvous' %}class="active"{% endif %}>Mes RDV</a></li>
-      {% endif %}
+    {% if current_user.is_authenticated and current_user.is_admin() %}
+      <li><a href="{{ url_for('admin.dashboard') }}" {% if 'admin' in request.endpoint %}class="active"{% endif %}>Dashboard</a></li>
+      <li><a href="{{ url_for('admin.services') }}" {% if request.endpoint == 'admin.services' %}class="active"{% endif %}>Services</a></li>
+      <li><a href="{{ url_for('admin.supplements') }}" {% if request.endpoint == 'admin.supplements' %}class="active"{% endif %}>Suppléments</a></li>
     {% endif %}
   </ul>
 
   <div class="nav-right">
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and current_user.is_admin() %}
       <span class="nav-user">{{ current_user.nom }}</span>
-      {% if current_user.is_admin() %}
-        <a href="{{ url_for('admin.profil') }}" class="nav-cta" style="margin-right:.5rem;">Mon profil</a>
-      {% endif %}
+      <a href="{{ url_for('admin.profil') }}" class="nav-cta" style="margin-right:.5rem;">Mon profil</a>
       <a href="{{ url_for('auth.logout') }}" class="nav-logout">Déconnexion</a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}" class="nav-logout">Connexion</a>
-      <a href="{{ url_for('auth.register') }}" class="nav-cta">S'inscrire</a>
     {% endif %}
   </div>
 
@@ -59,20 +51,13 @@
   <button class="mobile-close" onclick="closeMenu()">✕</button>
   <a href="{{ url_for('client.vitrine') }}" onclick="closeMenu()">Accueil</a>
   <a href="{{ url_for('client.profil_salon') }}" onclick="closeMenu()">Notre salon</a>
-  {% if current_user.is_authenticated %}
-    {% if current_user.is_admin() %}
-      <a href="{{ url_for('admin.dashboard') }}" onclick="closeMenu()">Dashboard</a>
-      <a href="{{ url_for('admin.services') }}" onclick="closeMenu()">Services</a>
-      <a href="{{ url_for('admin.profil') }}" onclick="closeMenu()">Mon profil</a>
-      <a href="{{ url_for('auth.logout') }}" onclick="closeMenu()">Déconnexion</a>
-    {% else %}
-      <a href="{{ url_for('client.reserver') }}" onclick="closeMenu()">Réserver</a>
-      <a href="{{ url_for('client.mes_rendezvous') }}" onclick="closeMenu()">Mes RDV</a>
-      <a href="{{ url_for('auth.logout') }}" onclick="closeMenu()">Déconnexion</a>
-    {% endif %}
-  {% else %}
-    <a href="{{ url_for('auth.login') }}" onclick="closeMenu()">Connexion</a>
-    <a href="{{ url_for('auth.register') }}" onclick="closeMenu()" style="color:var(--accent)">S'inscrire</a>
+  <a href="{{ url_for('client.reserver') }}" onclick="closeMenu()" style="color:var(--accent)">Réserver</a>
+  <a href="{{ url_for('client.suivi') }}" onclick="closeMenu()">Suivi RDV</a>
+  {% if current_user.is_authenticated and current_user.is_admin() %}
+    <a href="{{ url_for('admin.dashboard') }}" onclick="closeMenu()">Dashboard</a>
+    <a href="{{ url_for('admin.services') }}" onclick="closeMenu()">Services</a>
+    <a href="{{ url_for('admin.profil') }}" onclick="closeMenu()">Mon profil</a>
+    <a href="{{ url_for('auth.logout') }}" onclick="closeMenu()">Déconnexion</a>
   {% endif %}
 </div>
 
@@ -112,10 +97,8 @@
       <ul>
         <li><a href="{{ url_for('client.vitrine') }}">Accueil</a></li>
         <li><a href="{{ url_for('client.profil_salon') }}">Notre salon</a></li>
-        {% if current_user.is_authenticated and not current_user.is_admin() %}
         <li><a href="{{ url_for('client.reserver') }}">Réserver</a></li>
-        <li><a href="{{ url_for('client.mes_rendezvous') }}">Mes RDV</a></li>
-        {% endif %}
+        <li><a href="{{ url_for('client.suivi') }}">Suivi RDV</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -125,7 +108,14 @@
       <div class="footer-info-item">🕐 {{ profil_salon.horaires if profil_salon and profil_salon.horaires else 'Lun – Sam : 8h – 20h' }}</div>
     </div>
   </div>
-  <div class="footer-bottom">© 2026 {{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}. Tous droits réservés.</div>
+  <div class="footer-bottom">
+    © 2026 {{ profil_salon.nom_salon if profil_salon and profil_salon.nom_salon else 'MonSalon' }}. Tous droits réservés.
+    {% if current_user.is_authenticated and current_user.is_admin() %}
+      · <a href="{{ url_for('admin.dashboard') }}" style="color:var(--accent); opacity:.6; font-size:.78rem;">Dashboard</a>
+    {% else %}
+      · <a href="{{ url_for('auth.login') }}" style="color:inherit; opacity:.25; font-size:.78rem;">Admin</a>
+    {% endif %}
+  </div>
 </footer>
 
 <!-- WHATSAPP FLOAT -->

@@ -1,6 +1,5 @@
-﻿from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
-from flask_login import login_required, current_user
 from app.models import db, Service, Supplement, RendezVous, RDVSupplement, verifier_conflit, get_creneaux_disponibles
 from app.notifications import notifier_coiffeur_nouvelle_demande
 
@@ -25,17 +24,26 @@ def profil_salon():
 
 
 @client_bp.route('/reserver', methods=['GET', 'POST'])
-@login_required
 def reserver():
     services = Service.query.filter_by(actif=True).order_by(Service.nom).all()
     supplements = Supplement.query.filter_by(
         actif=True).order_by(Supplement.nom).all()
 
     if request.method == 'POST':
+        # Guest info
+        nom_client = request.form.get('nom_client', '').strip()
+        telephone = request.form.get('telephone', '').strip()
+        email_client = request.form.get('email_client', '').strip() or None
+
+        # Booking info
         service_id = request.form.get('service_id')
         date_str = request.form.get('date')
         heure_str = request.form.get('heure')
         supplement_ids = request.form.getlist('supplements')
+
+        if not nom_client or not telephone:
+            flash('Le nom et le telephone sont obligatoires.', 'danger')
+            return render_template('client/reserver.html', services=services, supplements=supplements)
 
         if not service_id or not date_str or not heure_str:
             flash('Tous les champs sont obligatoires.', 'danger')
@@ -58,15 +66,16 @@ def reserver():
             flash('Impossible de reserver a plus de 30 jours.', 'danger')
             return render_template('client/reserver.html', services=services, supplements=supplements)
 
+        # Check if this phone already has an active booking
         rdv_actif = RendezVous.query.filter(
-            RendezVous.user_id == current_user.id,
+            RendezVous.telephone == telephone,
             RendezVous.statut.in_(
                 ['en_attente', 'accepte', 'annulation_demandee'])
         ).first()
 
         if rdv_actif:
             flash(
-                'Vous avez deja un rendez-vous en cours. Annulez-le avant d\'en prendre un nouveau.', 'warning')
+                'Ce numero a deja un rendez-vous en cours. Attendez sa confirmation ou annulez-le avant d\'en prendre un nouveau.', 'warning')
             return render_template('client/reserver.html', services=services, supplements=supplements)
 
         if verifier_conflit(debut, service.duree_minutes):
@@ -82,7 +91,9 @@ def reserver():
                 supps_selectionnes.append(supp)
 
         rdv = RendezVous(
-            user_id=current_user.id,
+            nom_client=nom_client,
+            telephone=telephone,
+            email_client=email_client,
             service_id=service.id,
             debut_datetime=debut,
             duree_minutes=service.duree_minutes,
@@ -104,14 +115,19 @@ def reserver():
 
         db.session.commit()
         notifier_coiffeur_nouvelle_demande(rdv)
-        flash('Demande envoyee ! En attente de confirmation.', 'success')
-        return redirect(url_for('client.mes_rendezvous'))
+        flash('Demande envoyee ! Vous recevrez une confirmation par telephone.', 'success')
+        return redirect(url_for('client.confirmation', rdv_id=rdv.id))
 
     return render_template('client/reserver.html', services=services, supplements=supplements)
 
 
+@client_bp.route('/confirmation/<int:rdv_id>')
+def confirmation(rdv_id):
+    rdv = db.get_or_404(RendezVous, rdv_id)
+    return render_template('client/confirmation.html', rdv=rdv)
+
+
 @client_bp.route('/creneaux-disponibles')
-@login_required
 def creneaux_disponibles():
     service_id = request.args.get('service_id')
     date_str = request.args.get('date')
@@ -130,40 +146,41 @@ def creneaux_disponibles():
     })
 
 
-@client_bp.route('/mes-rendezvous')
-@login_required
-def mes_rendezvous():
-    # Clôture automatique des RDV expirés
-    from app.utils import cloturer_rdv_expires
-    cloturer_rdv_expires()
-
-    rdvs = RendezVous.query.filter_by(user_id=current_user.id).order_by(
-        RendezVous.debut_datetime.desc()).all()
-    return render_template('client/mes_rendezvous.html', rendezvous=rdvs, now=datetime.now())
+@client_bp.route('/suivi', methods=['GET', 'POST'])
+def suivi():
+    """Lookup bookings by phone number."""
+    rdvs = []
+    telephone = ''
+    if request.method == 'POST':
+        telephone = request.form.get('telephone', '').strip()
+        if telephone:
+            rdvs = RendezVous.query.filter_by(telephone=telephone).order_by(
+                RendezVous.debut_datetime.desc()).all()
+    return render_template('client/suivi.html', rendezvous=rdvs, telephone=telephone, now=datetime.now())
 
 
 @client_bp.route('/rdv/<int:rdv_id>/annuler', methods=['POST'])
-@login_required
 def annuler_rdv(rdv_id):
     rdv = db.get_or_404(RendezVous, rdv_id)
+    telephone = request.form.get('telephone', '').strip()
 
-    if rdv.user_id != current_user.id:
-        flash('Action non autorisee.', 'danger')
-        return redirect(url_for('client.mes_rendezvous'))
+    if rdv.telephone != telephone:
+        flash('Numero de telephone incorrect.', 'danger')
+        return redirect(url_for('client.suivi'))
 
     if rdv.statut in ['annule', 'annulation_demandee']:
         flash('Une demande d\'annulation est deja en cours.', 'warning')
-        return redirect(url_for('client.mes_rendezvous'))
+        return redirect(url_for('client.suivi'))
 
     if rdv.statut == 'refuse':
         flash('Ce RDV est deja refuse.', 'warning')
-        return redirect(url_for('client.mes_rendezvous'))
+        return redirect(url_for('client.suivi'))
 
     if rdv.debut_datetime < datetime.now():
         flash('Impossible d\'annuler un rendez-vous dont la date est passee.', 'danger')
-        return redirect(url_for('client.mes_rendezvous'))
+        return redirect(url_for('client.suivi'))
 
     rdv.statut = 'annulation_demandee'
     db.session.commit()
     flash('Demande d\'annulation envoyee. En attente de confirmation du coiffeur.', 'info')
-    return redirect(url_for('client.mes_rendezvous'))
+    return redirect(url_for('client.suivi'))
