@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, date, timedelta
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from functools import wraps
 from werkzeug.utils import secure_filename
@@ -72,6 +72,37 @@ def dashboard():
                                           ).strftime('%Y-%m-%d'),
                            now=datetime.now()
                            )
+
+
+@admin_bp.route('/api/nouvelles-demandes')
+@login_required
+@coiffeur_required
+def api_nouvelles_demandes():
+    since_ts = request.args.get('since', type=float, default=0)
+    since_dt = datetime.fromtimestamp(since_ts) if since_ts else datetime.min
+
+    attente_count = RendezVous.query.filter_by(statut='en_attente').count()
+    annulations_count = RendezVous.query.filter_by(statut='annulation_demandee').count()
+
+    nouvelles = RendezVous.query.filter(
+        RendezVous.statut == 'en_attente',
+        RendezVous.created_at > since_dt
+    ).order_by(RendezVous.created_at.desc()).all()
+
+    return jsonify({
+        'attente_count': attente_count,
+        'annulations_count': annulations_count,
+        'nouvelles': [
+            {
+                'id': r.id,
+                'nom_client': r.nom_client,
+                'service': r.service.nom,
+                'heure': r.debut_datetime.strftime('%d/%m %H:%M'),
+                'created_at': r.created_at.timestamp()
+            }
+            for r in nouvelles
+        ]
+    })
 
 
 @admin_bp.route('/services')

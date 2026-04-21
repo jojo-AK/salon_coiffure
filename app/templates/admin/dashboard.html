@@ -2,6 +2,95 @@
 {% block title %}Dashboard – {{ profil_salon.nom_salon if profil_salon else 'MonSalon' }}{% endblock %}
 
 {% block content %}
+
+<!-- Toast notification temps réel -->
+<div id="rdv-toast" style="
+  display:none; position:fixed; top:1.2rem; right:1.2rem; z-index:9999;
+  background:#1a1a2e; border:1px solid var(--accent); border-radius:12px;
+  padding:1rem 1.4rem; max-width:340px; box-shadow:0 8px 32px rgba(0,0,0,.5);
+  animation: slideIn .35s ease;">
+  <div style="display:flex; align-items:flex-start; gap:.8rem;">
+    <span style="font-size:1.4rem; line-height:1;">🔔</span>
+    <div style="flex:1;">
+      <div style="font-weight:700; color:var(--accent); margin-bottom:.3rem; font-size:.9rem;">Nouvelle demande !</div>
+      <div id="rdv-toast-body" style="font-size:.82rem; color:var(--text-muted); line-height:1.4;"></div>
+      <button onclick="window.location.reload()" style="
+        margin-top:.7rem; background:var(--accent); color:#0d0d1a; border:none;
+        border-radius:6px; padding:.4rem .9rem; font-size:.8rem; font-weight:700;
+        cursor:pointer;">Voir maintenant</button>
+    </div>
+    <button onclick="document.getElementById('rdv-toast').style.display='none'" style="
+      background:none; border:none; color:var(--text-muted); cursor:pointer;
+      font-size:1.1rem; line-height:1; padding:0;">×</button>
+  </div>
+</div>
+<style>
+@keyframes slideIn { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:translateX(0); } }
+</style>
+
+<script>
+(function() {
+  const API_URL = "{{ url_for('admin.api_nouvelles_demandes') }}";
+  let lastTs = Date.now() / 1000;
+  let knownAttenteCount = {{ rdv_attente|length }};
+  let knownAnnulCount = {{ rdv_annulations|length }};
+
+  function showToast(messages) {
+    const toast = document.getElementById('rdv-toast');
+    const body = document.getElementById('rdv-toast-body');
+    body.innerHTML = messages.join('<br>');
+    toast.style.display = 'block';
+    toast.style.animation = 'none';
+    void toast.offsetWidth;
+    toast.style.animation = 'slideIn .35s ease';
+    try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA...').play(); } catch(e) {}
+  }
+
+  function updateStatCard(selector, value) {
+    const el = document.querySelector(selector);
+    if (el) { el.textContent = value; }
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch(`${API_URL}?since=${lastTs}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const msgs = [];
+
+      if (data.nouvelles && data.nouvelles.length > 0) {
+        data.nouvelles.forEach(function(rdv) {
+          msgs.push(`👤 <strong>${rdv.nom_client}</strong> — ${rdv.service} à ${rdv.heure}`);
+        });
+        lastTs = Math.max(...data.nouvelles.map(r => r.created_at)) + 0.001;
+      }
+
+      if (data.attente_count !== knownAttenteCount) {
+        if (data.attente_count > knownAttenteCount && msgs.length === 0) {
+          msgs.push(`${data.attente_count} demande(s) en attente`);
+        }
+        updateStatCard('.stat-card:nth-child(1) .stat-number', data.attente_count);
+        knownAttenteCount = data.attente_count;
+      }
+
+      if (data.annulations_count !== knownAnnulCount) {
+        if (data.annulations_count > knownAnnulCount && msgs.length === 0) {
+          msgs.push(`${data.annulations_count} annulation(s) à traiter`);
+        }
+        updateStatCard('.stat-card:nth-child(3) .stat-number', data.annulations_count);
+        knownAnnulCount = data.annulations_count;
+      }
+
+      if (msgs.length > 0) showToast(msgs);
+
+    } catch(e) {}
+  }
+
+  setInterval(poll, 5000);
+})();
+</script>
+
 <div class="page-wrapper">
 
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">

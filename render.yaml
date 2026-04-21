@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: salon-coiffure
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --workers 2 --timeout 60 --log-file -
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        fromDatabase:
+          name: salon-db
+          property: connectionString
+
+databases:
+  - name: salon-db
+    plan: free
+    databaseName: salon
+    user: salon
